@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "brainierbees",
+  "version": "${version}",
+  "name": "Brainier Bees",
+  "description": "",
+  "authors": [
+    "dopadream"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "cursedcauldron.brainierbees.BrainierBees"
+    ]
+  },
+  "mixins": [
+    "brainierbees.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.9",
+    "fabric": "*",
+    "minecraft": "1.19.2"
+  }
+}
