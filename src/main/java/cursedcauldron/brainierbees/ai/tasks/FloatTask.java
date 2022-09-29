@@ -25,6 +25,5 @@ public class FloatTask extends Behavior<Bee> {
     @Override
     protected void start(ServerLevel serverLevel, Bee bee, long l) {
             bee.getJumpControl().jump();
-            System.out.println("water");
     }
 }
