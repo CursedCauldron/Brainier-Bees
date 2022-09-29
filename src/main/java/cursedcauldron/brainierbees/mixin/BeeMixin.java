@@ -15,6 +15,8 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
@@ -58,7 +60,12 @@ public abstract class BeeMixin extends Animal {
     @Inject(method = "<init>", at = @At("TAIL"))
     public void Bee(EntityType entityType, Level level, CallbackInfo ci) {
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 8.0F);
+        this.setPathfindingMalus(BlockPathTypes.TRAPDOOR, -1.0F);
     }
+
+
+
+
 
     @Inject(method = "registerGoals", at = @At("RETURN"))
     public void killGoals(CallbackInfo ci) {
