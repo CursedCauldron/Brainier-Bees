@@ -1,36 +1,44 @@
 package cursedcauldron.brainierbees.ai;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
-import cursedcauldron.brainierbees.ai.tasks.BeeAttackTask;
-import cursedcauldron.brainierbees.ai.tasks.BeeWanderTask;
-import cursedcauldron.brainierbees.ai.tasks.FloatTask;
+import cursedcauldron.brainierbees.ai.tasks.*;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.animal.Bee;
-import net.minecraft.world.entity.animal.frog.FrogAi;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.crafting.Ingredient;
 
-import java.util.Optional;
+import java.util.function.Predicate;
+
+import static cursedcauldron.brainierbees.ai.ModMemoryTypes.*;
 
 public class BeeBrain {
+    private static final UniformInt TIME_BETWEEN_POLLINATING = UniformInt.of(10, 15);
+
+
+    private static final UniformInt ADULT_FOLLOW_RANGE = UniformInt.of(3, 16);
 
     public BeeBrain() {
+    }
+
+    public static void initMemories(Bee bee, RandomSource randomSource) {
+        bee.getBrain().setMemory(ModMemoryTypes.POLLINATING_COOLDOWN, TIME_BETWEEN_POLLINATING.sample(randomSource));
+
     }
 
     public static Brain<?> makeBrain(Brain<Bee> brain) {
         initCoreActivity(brain);
         initIdleActivity(brain);
         initStingActivity(brain);
+        initPollinateActivity(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
         brain.useDefaultActivity();
@@ -38,72 +46,84 @@ public class BeeBrain {
     }
 
 
+
+    private static void initStingActivity(Brain<Bee> brain) {
+        brain.addActivityAndRemoveMemoryWhenStopped(
+                Activity.FIGHT,
+                0,
+                ImmutableList.of(
+                        new StopAttackingIfTargetInvalid<>(),
+                        new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1F),
+                        new BeeAttackTask(20),
+                        new EraseMemoryIf<>(Predicate.not(Bee::isAngry), MemoryModuleType.ATTACK_TARGET)
+                ),
+                MemoryModuleType.ATTACK_TARGET
+        );
+    }
+
+
+
+    private static void initPollinateActivity(Brain<Bee> brain) {
+        brain.addActivityWithConditions(
+                Activity.CELEBRATE,
+                ImmutableList.of(
+                        Pair.of(0, new BabyFollowAdult<>(ADULT_FOLLOW_RANGE, 1.25F)),
+                        Pair.of(0, new FindFlowerTask()),
+                        Pair.of(1, new PollinateFlowerTask()),
+                        Pair.of(2, new EraseMemoryIf<>(Bee::hasNectar, ModMemoryTypes.FLOWER_POS)
+                        )
+                ),
+                ImmutableSet.of(
+                        Pair.of(MemoryModuleType.TEMPTING_PLAYER, MemoryStatus.VALUE_ABSENT),
+                        Pair.of(MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT),
+                        Pair.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT),
+                        Pair.of(ModMemoryTypes.WANTS_HIVE, MemoryStatus.VALUE_ABSENT),
+                        Pair.of(ModMemoryTypes.POLLINATING_COOLDOWN, MemoryStatus.VALUE_ABSENT)
+                )
+        );
+    }
+
+
+
+
     private static void initCoreActivity(Brain<Bee> brain) {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
-                new LookAtTargetSink(0, 0), new MoveToTargetSink(),
+                new MoveToTargetSink(),
+                new CountDownCooldownTicks(ModMemoryTypes.POLLINATING_COOLDOWN),
+                new CountDownCooldownTicks(COOLDOWN_LOCATE_HIVE),
                 new CountDownCooldownTicks(MemoryModuleType.TEMPTATION_COOLDOWN_TICKS)));
+
     }
 
-    public static void initIdleActivity(Brain<Bee> brain) {
-        brain.addActivity(Activity.IDLE,
+
+    private static void initIdleActivity(Brain<Bee> brain) {
+        brain.addActivityWithConditions(
+                Activity.IDLE,
                 ImmutableList.of(
-                        Pair.of(0, new FollowTemptation(livingEntity -> 1.25F)),
-                        Pair.of(1, new AnimalMakeLove(EntityType.BEE, 1.0F)),
-                        Pair.of(3, new GateBehavior<>(
-                                ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT),
-                                ImmutableSet.of(),
-                                GateBehavior.OrderPolicy.ORDERED,
-                                GateBehavior.RunningPolicy.TRY_ALL,
-                                ImmutableList.of(
-                                        Pair.of(new BeeWanderTask(0.4F), 2),
-                                        Pair.of(new FloatTask(), 2)
-                                        )))
-                ));
+                        Pair.of(9, new FloatTask()),
+
+                        Pair.of(9, new GrowCropTask()),
+                        Pair.of(2, new AnimalMakeLove(EntityType.BEE, 1.0F)),
+                        Pair.of(3, new FollowTemptation(livingEntity -> 1.25F)),
+                        Pair.of(0, new BabyFollowAdult<>(ADULT_FOLLOW_RANGE, 1.25F)),
+                        Pair.of(5, new LocateHiveTask()),
+                        Pair.of(0, new GoToHiveTask()),
+                        Pair.of(1, new EnterHiveTask()),
+                        Pair.of(9, new BeeWanderTask(0.6F)
+                        )
+                ),
+                ImmutableSet.of(Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT))
+        );
     }
 
-    public static void initStingActivity(Brain<Bee> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT,10,
-                ImmutableList.of(new GateBehavior<>(
-                                ImmutableMap.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryStatus.VALUE_ABSENT),
-                                ImmutableSet.of(),
-                                GateBehavior.OrderPolicy.ORDERED,
-                                GateBehavior.RunningPolicy.TRY_ALL,
-                                ImmutableList.of(
-                                        Pair.of(new StartAttacking<>(Bee::isAngry, bee -> bee.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE)), 2),
-                                        Pair.of(new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0F), 2),
-                                        Pair.of(new BeeAttackTask(0.4F), 2),
-                                        Pair.of(new FloatTask(), 2)
-                                ))
-                ), MemoryModuleType.ATTACK_TARGET);
-    }
 
 
     public static void updateActivity(Bee bee) {
-        bee.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.IDLE));
+        bee.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT,  Activity.CELEBRATE, Activity.IDLE));
     }
 
-
-
-    private static Optional<? extends LivingEntity> findNearestValidAttackTarget(Bee bee) {
-        Brain<Bee> brain = (Brain<Bee>) bee.getBrain();
-            Optional<LivingEntity> optional = BehaviorUtils.getLivingEntityFromUUIDMemory(bee, MemoryModuleType.ANGRY_AT);
-            if (optional.isPresent() && Sensor.isEntityAttackableIgnoringLineOfSight(bee, optional.get())) {
-                return optional;
-            } else {
-                Optional optional2;
-                if (brain.hasMemoryValue(MemoryModuleType.UNIVERSAL_ANGER)) {
-                    optional2 = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER);
-                    if (optional2.isPresent()) {
-                        return optional2;
-                    }
-                }
-                return Optional.empty();
-            }
-    }
 
     public static Ingredient getTemptations() {
         return Ingredient.of(ItemTags.FLOWERS);
     }
-
-
 }

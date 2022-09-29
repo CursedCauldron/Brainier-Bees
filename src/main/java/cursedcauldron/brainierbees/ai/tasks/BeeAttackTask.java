@@ -1,52 +1,48 @@
 package cursedcauldron.brainierbees.ai.tasks;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.Bee;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ProjectileWeaponItem;
 
 
-public class BeeAttackTask extends Behavior<Bee> {
+public class BeeAttackTask extends MeleeAttack {
 
     private final float cooldownBetweenAttacks;
 
     public BeeAttackTask(float i) {
-        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryStatus.VALUE_ABSENT));
+        super(60);
         this.cooldownBetweenAttacks = i;
     }
 
+    @Override
+    protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
+        if (mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
+            LivingEntity livingEntity = getAttackTarget(mob);
+            Bee bee = (Bee) mob;
+            return mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent() && bee.isAngry() && !bee.hasStung() && BehaviorUtils.canSee(mob, livingEntity) && mob.isWithinMeleeAttackRange(livingEntity);
+        } else {
+            return false;
+        }
+    }
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, Bee mob) {
-        return mob.isAngry() && !mob.hasStung();
+    protected boolean canStillUse(ServerLevel serverLevel, Mob mob, long l) {
+        if (mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
+            LivingEntity livingEntity = getAttackTarget(mob);
+            Bee bee = (Bee) mob;
+            return mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent() && bee.isAngry() && !bee.hasStung() && BehaviorUtils.canSee(mob, livingEntity) && mob.isWithinMeleeAttackRange(livingEntity);
+        } else {
+            return false;
+        }
     }
 
 
-    @Override
-    protected boolean canStillUse(ServerLevel serverLevel, Bee bee, long l) {
-        return bee.isAngry() && !bee.hasStung();
-    }
-
-
-    @Override
-    protected void start(ServerLevel serverLevel, Bee mob, long l) {
-        LivingEntity livingEntity = this.getAttackTarget(mob);
-        BehaviorUtils.lookAtEntity(mob, livingEntity);
-        mob.swing(InteractionHand.MAIN_HAND);
-        mob.doHurtTarget(livingEntity);
-        mob.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_COOLING_DOWN, true, (long)this.cooldownBetweenAttacks);
-    }
-
-    private LivingEntity getAttackTarget(Bee mob) {
-        return mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
+    private LivingEntity getAttackTarget(Mob mob) {
+        return (LivingEntity)mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
     }
 
 }
