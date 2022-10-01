@@ -101,6 +101,7 @@ public class PollinateFlowerTask extends Behavior<Bee> {
         }
         if (bee.getBrain().getMemory(POLLINATING_TICKS).get() > 600) {
             bee.getBrain().eraseMemory(FLOWER_POS);
+            bee.getBrain().setMemory(POLLINATING_TICKS, 0);
         } else {
             Vec3 vec3 = Vec3.atBottomCenterOf(bee.getBrain().getMemory(FLOWER_POS).get()).add(0.0, 0.6F, 0.0);
             if (vec3.distanceTo(bee.position()) > 1.0) {
@@ -111,10 +112,11 @@ public class PollinateFlowerTask extends Behavior<Bee> {
                     this.hoverPos = vec3;
                 }
 
-                boolean bl = bee.position().distanceTo(this.hoverPos) <= 0.4;
+                boolean bl = bee.position().distanceTo(this.hoverPos) <= 0.1;
                 boolean bl2 = true;
                 if (!bl && bee.getBrain().getMemory(POLLINATING_TICKS).get() > 600) {
                     bee.getBrain().eraseMemory(FLOWER_POS);
+                    bee.getBrain().setMemory(POLLINATING_TICKS, 0);
                 } else {
                     if (bl) {
                         boolean bl3 = bee.getRandom().nextInt(25) == 0;
