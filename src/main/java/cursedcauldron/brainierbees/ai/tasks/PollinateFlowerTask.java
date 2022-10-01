@@ -95,6 +95,7 @@ public class PollinateFlowerTask extends Behavior<Bee> {
         super.tick(serverLevel, bee, l);
         if (bee.getBrain().getMemory(POLLINATING_TICKS).isPresent()) {
             bee.getBrain().setMemory(POLLINATING_TICKS, bee.getBrain().getMemory(POLLINATING_TICKS).get() + 1);
+            System.out.println("Ticks: " + bee.getBrain().getMemory(POLLINATING_TICKS).get());
         } else {
             bee.getBrain().setMemory(POLLINATING_TICKS, 1);
         }
@@ -110,7 +111,7 @@ public class PollinateFlowerTask extends Behavior<Bee> {
                     this.hoverPos = vec3;
                 }
 
-                boolean bl = bee.position().distanceTo(this.hoverPos) <= 0.1;
+                boolean bl = bee.position().distanceTo(this.hoverPos) <= 0.4;
                 boolean bl2 = true;
                 if (!bl && bee.getBrain().getMemory(POLLINATING_TICKS).get() > 600) {
                     bee.getBrain().eraseMemory(FLOWER_POS);
@@ -133,8 +134,10 @@ public class PollinateFlowerTask extends Behavior<Bee> {
 
                     if (bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).isPresent()) {
                         bee.getBrain().setMemory(SUCCESSFUL_POLLINATING_TICKS, bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get() + 1);
+                        System.out.println("Successful ticks: " + bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get());
                     } else {
                         bee.getBrain().setMemory(SUCCESSFUL_POLLINATING_TICKS, 1);
+                        System.out.println(bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get());
                     }
                     if (bee.getRandom().nextFloat() < 0.05F && bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get() > this.lastSoundPlayedTick + 59) {
                         this.lastSoundPlayedTick = bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get();
