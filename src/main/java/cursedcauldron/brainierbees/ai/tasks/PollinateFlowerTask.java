@@ -136,7 +136,6 @@ public class PollinateFlowerTask extends Behavior<Bee> {
                         bee.getBrain().setMemory(SUCCESSFUL_POLLINATING_TICKS, bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get() + 1);
                     } else {
                         bee.getBrain().setMemory(SUCCESSFUL_POLLINATING_TICKS, 1);
-                        System.out.println(bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get());
                     }
                     if (bee.getRandom().nextFloat() < 0.05F && bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get() > this.lastSoundPlayedTick + 59) {
                         this.lastSoundPlayedTick = bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get();
