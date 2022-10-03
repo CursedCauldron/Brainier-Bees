@@ -60,7 +60,7 @@ public abstract class BeeMixin extends Animal {
     @Inject(method = "<init>", at = @At("TAIL"))
     public void Bee(EntityType entityType, Level level, CallbackInfo ci) {
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 8.0F);
-        this.setPathfindingMalus(BlockPathTypes.TRAPDOOR, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.TRAPDOOR, 8.0F);
     }
 
 
