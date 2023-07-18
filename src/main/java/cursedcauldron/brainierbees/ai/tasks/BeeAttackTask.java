@@ -14,32 +14,9 @@ public class BeeAttackTask extends MeleeAttack {
     private final float cooldownBetweenAttacks;
 
     public BeeAttackTask(float i) {
-        super(60);
+        super();
         this.cooldownBetweenAttacks = i;
     }
-
-    @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-        if (mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
-            LivingEntity livingEntity = getAttackTarget(mob);
-            Bee bee = (Bee) mob;
-            return mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent() && bee.isAngry() && !bee.hasStung() && BehaviorUtils.canSee(mob, livingEntity) && mob.isWithinMeleeAttackRange(livingEntity);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    protected boolean canStillUse(ServerLevel serverLevel, Mob mob, long l) {
-        if (mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
-            LivingEntity livingEntity = getAttackTarget(mob);
-            Bee bee = (Bee) mob;
-            return mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent() && bee.isAngry() && !bee.hasStung() && BehaviorUtils.canSee(mob, livingEntity) && mob.isWithinMeleeAttackRange(livingEntity);
-        } else {
-            return false;
-        }
-    }
-
 
     private LivingEntity getAttackTarget(Mob mob) {
         return (LivingEntity)mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();

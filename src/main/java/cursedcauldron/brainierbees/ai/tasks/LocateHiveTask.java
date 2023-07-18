@@ -2,7 +2,9 @@ package cursedcauldron.brainierbees.ai.tasks;
 
 import cursedcauldron.brainierbees.ai.ModMemoryTypes;
 import cursedcauldron.brainierbees.mixin.BeeAccessor;
+import cursedcauldron.brainierbees.util.HiveAccessor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -29,20 +31,11 @@ public class LocateHiveTask extends Behavior<Bee> {
         super(Map.of(ModMemoryTypes.COOLDOWN_LOCATE_HIVE, MemoryStatus.VALUE_ABSENT));
     }
 
-    public boolean wantsToEnterHive(ServerLevel level, Bee bee) {
-        if (((BeeAccessor)bee).getStayOutOfHiveCountdown() <= 0 && !bee.hasStung() && bee.getTarget() == null) {
-            boolean bl = level.isRaining() || level.isNight() || bee.hasNectar();
-            return bl && !this.isHiveNearFire(level, bee);
-        } else {
-            return false;
-        }
-    }
-
     private boolean isHiveNearFire(ServerLevel level, Bee bee) {
         if (bee.getBrain().getMemory(HIVE_POS).isEmpty()) {
             return false;
         } else {
-            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get());
+            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get().pos());
             return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity)blockEntity).isFireNearby();
         }
     }
@@ -65,18 +58,13 @@ public class LocateHiveTask extends Behavior<Bee> {
         List<BlockPos> list = this.findNearbyHivesWithSpace(level, bee);
         if (!list.isEmpty()) {
             for(BlockPos blockPos : list) {
-                if (bee.getBrain().getMemory(HIVE_BLACKLIST).isEmpty() || !bee.getBrain().getMemory(HIVE_BLACKLIST).get().contains(blockPos)) {
-                    bee.getBrain().setMemory(HIVE_POS, blockPos);
-                    ((BeeAccessor)bee).setHivePos(blockPos);
+                if (bee.getBrain().getMemory(HIVE_BLACKLIST).isEmpty() || !bee.getBrain().getMemory(HIVE_BLACKLIST).get().contains(GlobalPos.of(bee.level().dimension(), blockPos))) {
+//                    bee.getBrain().setMemory(HIVE_POS, GlobalPos.of(level.dimension(), blockPos));
+//                    ((BeeAccessor)bee).setHivePos(blockPos);
+                    ((HiveAccessor)bee).setMemorizedHome(blockPos);
                     return;
                 }
             }
-
-            if (bee.getBrain().getMemory(HIVE_BLACKLIST).isPresent()) {
-                bee.getBrain().getMemory(HIVE_BLACKLIST).get().clear();
-            }
-            bee.getBrain().setMemory(HIVE_POS, list.get(0));
-            ((BeeAccessor)bee).setHivePos(list.get(0));
         }
     }
 

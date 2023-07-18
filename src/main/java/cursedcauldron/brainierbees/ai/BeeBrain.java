@@ -22,8 +22,6 @@ import static cursedcauldron.brainierbees.ai.ModMemoryTypes.*;
 
 public class BeeBrain {
     private static final UniformInt TIME_BETWEEN_POLLINATING = UniformInt.of(10, 15);
-
-
     private static final UniformInt ADULT_FOLLOW_RANGE = UniformInt.of(3, 16);
 
     public BeeBrain() {
@@ -31,7 +29,6 @@ public class BeeBrain {
 
     public static void initMemories(Bee bee, RandomSource randomSource) {
         bee.getBrain().setMemory(ModMemoryTypes.POLLINATING_COOLDOWN, TIME_BETWEEN_POLLINATING.sample(randomSource));
-
     }
 
     public static Brain<?> makeBrain(Brain<Bee> brain) {
@@ -52,10 +49,10 @@ public class BeeBrain {
                 Activity.FIGHT,
                 0,
                 ImmutableList.of(
-                        new StopAttackingIfTargetInvalid<>(),
-                        new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1F),
-                        new BeeAttackTask(20),
-                        new EraseMemoryIf<>(Predicate.not(Bee::isAngry), MemoryModuleType.ATTACK_TARGET)
+                        StopAttackingIfTargetInvalid.create(),
+                        SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1F),
+                        BeeAttackTask.create(20),
+                        EraseMemoryIf.create(Predicate.not(Bee::isAngry), MemoryModuleType.ATTACK_TARGET)
                 ),
                 MemoryModuleType.ATTACK_TARGET
         );
@@ -67,24 +64,21 @@ public class BeeBrain {
         brain.addActivityWithConditions(
                 Activity.CELEBRATE,
                 ImmutableList.of(
-                        Pair.of(0, new BabyFollowAdult<>(ADULT_FOLLOW_RANGE, 1.25F)),
+                        Pair.of(0, BabyFollowAdult.create(ADULT_FOLLOW_RANGE, 1.25F)),
                         Pair.of(0, new FindFlowerTask()),
                         Pair.of(1, new PollinateFlowerTask()),
-                        Pair.of(2, new EraseMemoryIf<>(Bee::hasNectar, ModMemoryTypes.FLOWER_POS)
-                        )
-                ),
+                        Pair.of(2, EraseMemoryIf.create(Bee::hasNectar, ModMemoryTypes.FLOWER_POS)),
+                        Pair.of(3, EraseMemoryIf.create(Bee::wantsToEnterHive, ModMemoryTypes.FLOWER_POS))
+                        ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.TEMPTING_PLAYER, MemoryStatus.VALUE_ABSENT),
                         Pair.of(MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT),
                         Pair.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT),
-                        Pair.of(ModMemoryTypes.WANTS_HIVE, MemoryStatus.VALUE_ABSENT),
+                        Pair.of(WANTS_HIVE, MemoryStatus.VALUE_ABSENT),
                         Pair.of(ModMemoryTypes.POLLINATING_COOLDOWN, MemoryStatus.VALUE_ABSENT)
                 )
         );
     }
-
-
-
 
     private static void initCoreActivity(Brain<Bee> brain) {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
@@ -101,15 +95,19 @@ public class BeeBrain {
                 Activity.IDLE,
                 ImmutableList.of(
                         Pair.of(9, new FloatTask()),
-
                         Pair.of(9, new GrowCropTask()),
                         Pair.of(2, new AnimalMakeLove(EntityType.BEE, 1.0F)),
-                        Pair.of(3, new FollowTemptation(livingEntity -> 1.25F)),
-                        Pair.of(0, new BabyFollowAdult<>(ADULT_FOLLOW_RANGE, 1.25F)),
+                        Pair.of(3, new BetterFollowTemptation(livingEntity -> 0.6F)),
+                        Pair.of(0, BabyFollowAdult.create(ADULT_FOLLOW_RANGE, 1.25F)),
                         Pair.of(5, new LocateHiveTask()),
                         Pair.of(0, new GoToHiveTask()),
                         Pair.of(1, new EnterHiveTask()),
-                        Pair.of(9, new BeeWanderTask(0.6F)
+                        Pair.of(
+                                9,
+                                new RunOne(
+                                        ImmutableList.of(
+                                                Pair.of(new BeePathfinding(), 1))
+                                )
                         )
                 ),
                 ImmutableSet.of(Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT))

@@ -32,7 +32,7 @@ public class EnterHiveTask extends Behavior<Bee> {
         if (bee.getBrain().getMemory(HIVE_POS).isEmpty()) {
             return false;
         } else {
-            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get());
+            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get().pos());
             return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity)blockEntity).isFireNearby();
         }
     }
@@ -40,8 +40,8 @@ public class EnterHiveTask extends Behavior<Bee> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Bee bee) {
-        if (bee.getBrain().getMemory(HIVE_POS).isPresent() && this.wantsToEnterHive(serverLevel, bee) && bee.getBrain().getMemory(HIVE_POS).get().closerToCenterThan(bee.position(), 2.0)) {
-            BlockEntity blockEntity = serverLevel.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get());
+        if (bee.getBrain().getMemory(HIVE_POS).isPresent() && this.wantsToEnterHive(serverLevel, bee) && bee.getBrain().getMemory(HIVE_POS).get().pos().closerToCenterThan(bee.position(), 2.0)) {
+            BlockEntity blockEntity = serverLevel.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get().pos());
             if (blockEntity instanceof BeehiveBlockEntity beehiveBlockEntity) {
                 if (!beehiveBlockEntity.isFull()) {
                     return true;
@@ -63,7 +63,7 @@ public class EnterHiveTask extends Behavior<Bee> {
     @Override
     protected void start(ServerLevel serverLevel, Bee bee, long l) {
         if (bee.getBrain().getMemory(HIVE_POS).isPresent()) {
-            BlockEntity blockEntity = serverLevel.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get());
+            BlockEntity blockEntity = serverLevel.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get().pos());
             if (blockEntity instanceof BeehiveBlockEntity beehiveBlockEntity) {
                 beehiveBlockEntity.addOccupant(bee, bee.hasNectar());
             }

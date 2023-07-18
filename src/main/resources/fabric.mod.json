@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "brainierbees",
-  "version": "${version}",
+  "version": "1.4",
   "icon": "assets/brainierbees/icon.png",
   "name": "Brainier Bees",
-  "description": "Makes bees smarter.",
+  "description": "Rewrites Bees' AI to be smarter!",
   "authors": [
     "dopadream"
   ],
@@ -16,12 +16,13 @@
       "cursedcauldron.brainierbees.BrainierBees"
     ]
   },
+  "accessWidener": "brainierbees.accesswidener",
   "mixins": [
     "brainierbees.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.9",
     "fabric": "*",
-    "minecraft": ">=1.19.1"
+    "minecraft": ">=1.20"
   }
 }

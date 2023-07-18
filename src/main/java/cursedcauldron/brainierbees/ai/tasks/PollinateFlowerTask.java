@@ -11,7 +11,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static cursedcauldron.brainierbees.ai.ModMemoryTypes.*;
 
@@ -33,12 +32,12 @@ public class PollinateFlowerTask extends Behavior<Bee> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Bee bee) {
-        return bee.getBrain().getMemory(FLOWER_POS).isPresent() && bee.getBrain().getMemory(POLLINATING_COOLDOWN).isEmpty();
+        return bee.getBrain().getMemory(FLOWER_POS).isPresent() && bee.getBrain().getMemory(POLLINATING_COOLDOWN).isEmpty() && !(bee.getBrain().getMemory(WANTS_HIVE).isPresent() && bee.getBrain().getMemory(WANTS_HIVE).get());
     }
 
     @Override
     protected boolean canStillUse(ServerLevel serverLevel, Bee bee, long l) {
-        return bee.getBrain().getMemory(FLOWER_POS).isPresent() && bee.getBrain().getMemory(POLLINATING_COOLDOWN).isEmpty();
+        return bee.getBrain().getMemory(FLOWER_POS).isPresent() && bee.getBrain().getMemory(POLLINATING_COOLDOWN).isEmpty() && !(bee.getBrain().getMemory(WANTS_HIVE).isPresent() && bee.getBrain().getMemory(WANTS_HIVE).get());
     }
 
     private boolean hasPollinatedLongEnough(Bee bee) {
@@ -101,7 +100,7 @@ public class PollinateFlowerTask extends Behavior<Bee> {
             bee.getBrain().eraseMemory(FLOWER_POS);
             bee.getBrain().setMemory(POLLINATING_TICKS, 0);
         } else {
-            Vec3 vec3 = Vec3.atBottomCenterOf(bee.getBrain().getMemory(FLOWER_POS).get()).add(0.0, 0.6F, 0.0);
+            Vec3 vec3 = Vec3.atBottomCenterOf(bee.getBrain().getMemory(FLOWER_POS).get().pos()).add(0.0, 0.6F, 0.0);
             if (vec3.distanceTo(bee.position()) > 1.0) {
                 this.hoverPos = vec3;
                 this.setWantedPos(bee);

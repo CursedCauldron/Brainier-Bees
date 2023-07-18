@@ -11,6 +11,5 @@ public class BrainierBees implements ModInitializer {
     @Override
     public void onInitialize() {
         ModMemoryTypes.MEMORY_MODULES.register();
-
     }
 }

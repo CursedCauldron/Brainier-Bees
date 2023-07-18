@@ -14,8 +14,6 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 import java.util.Map;
 
-import static cursedcauldron.brainierbees.ai.ModMemoryTypes.HIVE_POS;
-
 public class GrowCropTask extends Behavior<Bee> {
 
     public GrowCropTask() {
@@ -28,7 +26,7 @@ public class GrowCropTask extends Behavior<Bee> {
         } else if (level.getRandom().nextFloat() < 0.3F) {
             return false;
         } else {
-            return bee.hasNectar() && bee.getBrain().getMemory(HIVE_POS).isPresent();
+            return bee.hasNectar();
         }
     }
 

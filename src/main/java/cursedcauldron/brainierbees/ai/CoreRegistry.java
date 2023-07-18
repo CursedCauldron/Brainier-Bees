@@ -1,34 +1,29 @@
 package cursedcauldron.brainierbees.ai;
 
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 public class CoreRegistry<T> {
-    private final ResourceKey<Registry<T>> key;
-    private final String modId;
-    private final Registry<T> registry;
-    private boolean isPresent;
+    protected final Registry<T> registry;
+    protected final String modId;
+    protected boolean isPresent;
 
-    @SuppressWarnings("all")
-    public CoreRegistry(ResourceKey<Registry<T>> key, String modId) {
-        this.key = key;
+    protected CoreRegistry(Registry<T> registry, String modId) {
+        this.registry = registry;
         this.modId = modId;
         this.isPresent = false;
-        this.registry = Registry.REGISTRY.get((ResourceKey)key);
     }
 
-    public static <T> CoreRegistry<T> create(ResourceKey<Registry<T>> key, String modId) {
-        return new CoreRegistry<>(key, modId);
+    public static <T> CoreRegistry<T> create(Registry<T> registry, String modId) {
+        return new CoreRegistry<>(registry, modId);
     }
 
     public <E extends T> E register(String key, E entry) {
-        Registry.register(this.registry, new ResourceLocation(this.modId, key), entry);
-        return entry;
+        return Registry.register(this.registry, new ResourceLocation(this.modId, key), entry);
     }
 
     public void register() {
-        if (this.isPresent) throw new IllegalStateException("Duplication of Registry: " + this.key);
+        if (this.isPresent) throw new IllegalArgumentException("Duplication of Registry: " + this.registry);
         this.isPresent = true;
     }
 }
