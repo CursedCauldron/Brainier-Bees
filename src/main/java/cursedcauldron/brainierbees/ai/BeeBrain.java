@@ -96,12 +96,12 @@ public class BeeBrain {
                 ImmutableList.of(
                         Pair.of(9, new FloatTask()),
                         Pair.of(9, new GrowCropTask()),
-                        Pair.of(2, new AnimalMakeLove(EntityType.BEE, 1.0F)),
-                        Pair.of(3, new BetterFollowTemptation(livingEntity -> 0.6F)),
-                        Pair.of(0, BabyFollowAdult.create(ADULT_FOLLOW_RANGE, 1.25F)),
+                        Pair.of(3, new AnimalMakeLove(EntityType.BEE, 1.0F)),
+                        Pair.of(4, new BetterFollowTemptation(livingEntity -> 0.6F)),
+                        Pair.of(1, BabyFollowAdult.create(ADULT_FOLLOW_RANGE, 1.25F)),
                         Pair.of(5, new LocateHiveTask()),
                         Pair.of(0, new GoToHiveTask()),
-                        Pair.of(1, new EnterHiveTask()),
+                        Pair.of(2, new EnterHiveTask()),
                         Pair.of(
                                 9,
                                 new RunOne(
