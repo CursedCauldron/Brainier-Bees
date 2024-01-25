@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
@@ -54,6 +55,8 @@ public class GoToHiveTask extends Behavior<Bee> {
     @Override
     protected void start(ServerLevel serverLevel, Bee bee, long l) {
         super.start(serverLevel, bee, l);
+        bee.getBrain().eraseMemory(MemoryModuleType.BREED_TARGET);
+        bee.resetLove();
     }
 
 
