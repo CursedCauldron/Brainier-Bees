@@ -3,10 +3,12 @@ package cursedcauldron.brainierbees.ai.tasks;
 import cursedcauldron.brainierbees.mixin.BeeAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -143,6 +145,10 @@ public class PollinateFlowerTask extends Behavior<Bee> {
 
                 }
             }
+        }
+        if (!serverLevel.getBlockState(bee.getBrain().getMemory(FLOWER_POS).get().pos()).is(BlockTags.FLOWERS)) {
+            bee.getBrain().eraseMemory(FLOWER_POS);
+            bee.getBrain().setMemory(POLLINATING_TICKS, 0);
         }
     }
 }
