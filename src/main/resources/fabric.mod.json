@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "brainierbees",
-  "version": "1.4",
+  "version": "1.4.3",
   "icon": "assets/brainierbees/icon.png",
   "name": "Brainier Bees",
   "description": "Rewrites Bees' AI to be smarter!",

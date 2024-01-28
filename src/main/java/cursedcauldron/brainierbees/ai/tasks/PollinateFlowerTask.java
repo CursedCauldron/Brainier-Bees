@@ -146,9 +146,11 @@ public class PollinateFlowerTask extends Behavior<Bee> {
                 }
             }
         }
-        if (!serverLevel.getBlockState(bee.getBrain().getMemory(FLOWER_POS).get().pos()).is(BlockTags.FLOWERS)) {
-            bee.getBrain().eraseMemory(FLOWER_POS);
-            bee.getBrain().setMemory(POLLINATING_TICKS, 0);
+        if(bee.getBrain().getMemory(FLOWER_POS).isPresent()) {
+            if (!serverLevel.getBlockState(bee.getBrain().getMemory(FLOWER_POS).get().pos()).is(BlockTags.FLOWERS)) {
+                bee.getBrain().eraseMemory(FLOWER_POS);
+                bee.getBrain().setMemory(POLLINATING_TICKS, 0);
+            }
         }
     }
 }
