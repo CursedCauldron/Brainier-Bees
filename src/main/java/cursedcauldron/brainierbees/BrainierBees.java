@@ -23,7 +23,7 @@ public class BrainierBees implements ModInitializer {
                 # (Default/Vanilla: 22)
                 maxWanderRadius=22
                 
-                #Determines the distance that bees can see flowers from.
+                #Determines the radius in blocks that bees can target flowers from.
                 # (Default: 8/Vanilla: 5)
                 flowerLocateRange=8
                 """;
