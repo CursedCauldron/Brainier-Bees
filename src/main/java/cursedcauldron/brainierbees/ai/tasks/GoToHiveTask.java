@@ -96,9 +96,9 @@ public class GoToHiveTask extends Behavior<Bee> {
                 bee.getBrain().setMemory(LAST_PATH, bee.getNavigation().getPath());
             }
         }
-        if (bee.getBrain().getMemory(TRAVELLING_TICKS).isPresent()) {
-            LOGGER.warn(bee.getBrain().getMemory(TRAVELLING_TICKS).get());
-        }
+//        if (bee.getBrain().getMemory(TRAVELLING_TICKS).isPresent()) {
+//            LOGGER.warn(bee.getBrain().getMemory(TRAVELLING_TICKS).get());
+//        }
     }
 
     private boolean pathfindDirectlyTowards(BlockPos blockPos, Bee bee) {
