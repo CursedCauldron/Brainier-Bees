@@ -31,15 +31,6 @@ public class LocateHiveTask extends Behavior<Bee> {
         super(Map.of(ModMemoryTypes.COOLDOWN_LOCATE_HIVE, MemoryStatus.VALUE_ABSENT));
     }
 
-    private boolean isHiveNearFire(ServerLevel level, Bee bee) {
-        if (bee.getBrain().getMemory(HIVE_POS).isEmpty()) {
-            return false;
-        } else {
-            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get().pos());
-            return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity)blockEntity).isFireNearby();
-        }
-    }
-
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Bee bee) {
         return bee.getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).isEmpty() && bee.getBrain().getMemory(HIVE_POS).isEmpty();
@@ -59,7 +50,7 @@ public class LocateHiveTask extends Behavior<Bee> {
         if (!list.isEmpty()) {
             for(BlockPos blockPos : list) {
                 if (bee.getBrain().getMemory(HIVE_BLACKLIST).isEmpty() || !bee.getBrain().getMemory(HIVE_BLACKLIST).get().contains(GlobalPos.of(bee.level().dimension(), blockPos))) {
-//                    bee.getBrain().setMemory(HIVE_POS, GlobalPos.of(level.dimension(), blockPos));
+                    bee.getBrain().setMemory(HIVE_POS, GlobalPos.of(level.dimension(), blockPos));
 //                    ((BeeAccessor)bee).setHivePos(blockPos);
                     ((HiveAccessor)bee).setMemorizedHome(blockPos);
                     return;

@@ -1,6 +1,8 @@
 package cursedcauldron.brainierbees.ai.tasks;
 
+import cursedcauldron.brainierbees.BrainierBees;
 import cursedcauldron.brainierbees.ai.ModMemoryTypes;
+import cursedcauldron.brainierbees.util.SimpleConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -86,8 +88,8 @@ public class BeePathfinding extends Behavior<Bee> {
                         break; // Valid spot to go towards. Homeless bees only!
                     }
                 } else {
-                    if (blockCloserThan(beeEntity, mutable, 22) && world.getBlockState(new BlockPos(mutable.getX(), mutable.getY()-2, mutable.getZ())).isAir()) {
-                        break; // Valid spot to go towards within a 22 block radius of their home (if they have one!)
+                    if (blockCloserThan(beeEntity, mutable, new BrainierBees().MAX_WANDER_RADIUS) && world.getBlockState(new BlockPos(mutable.getX(), mutable.getY()-2, mutable.getZ())).isAir()) {
+                        break; // Valid spot to go towards within a set radius of their home (if they have one!)
                     }
                 }
             }

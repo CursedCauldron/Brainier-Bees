@@ -1,6 +1,7 @@
 package cursedcauldron.brainierbees.ai.tasks;
 
 import com.google.common.collect.Lists;
+import cursedcauldron.brainierbees.BrainierBees;
 import cursedcauldron.brainierbees.ai.ModMemoryTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -39,7 +40,7 @@ public class FindFlowerTask extends Behavior<Bee> {
     }
 
     public BlockPos getFlowerPos(Bee entity, ServerLevel level) {
-        int radius = 5;
+        int radius = new BrainierBees().FLOWER_LOCATE_RANGE;
         List<BlockPos> possibles = Lists.newArrayList();
         for (int x = -radius; x <= radius; x++) {
             for (int z = -radius; z <= radius; z++) {
