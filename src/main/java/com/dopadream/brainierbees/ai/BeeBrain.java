@@ -1,9 +1,9 @@
-package cursedcauldron.brainierbees.ai;
+package com.dopadream.brainierbees.ai;
 
+import com.dopadream.brainierbees.ai.tasks.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
-import cursedcauldron.brainierbees.ai.tasks.*;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -17,8 +17,6 @@ import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.function.Predicate;
-
-import static cursedcauldron.brainierbees.ai.ModMemoryTypes.*;
 
 public class BeeBrain {
     private static final UniformInt TIME_BETWEEN_POLLINATING = UniformInt.of(10, 15);
@@ -74,7 +72,7 @@ public class BeeBrain {
                         Pair.of(MemoryModuleType.TEMPTING_PLAYER, MemoryStatus.VALUE_ABSENT),
                         Pair.of(MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT),
                         Pair.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT),
-                        Pair.of(WANTS_HIVE, MemoryStatus.VALUE_ABSENT),
+                        Pair.of(ModMemoryTypes.WANTS_HIVE, MemoryStatus.VALUE_ABSENT),
                         Pair.of(ModMemoryTypes.POLLINATING_COOLDOWN, MemoryStatus.VALUE_ABSENT)
                 )
         );
@@ -84,7 +82,7 @@ public class BeeBrain {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
                 new MoveToTargetSink(),
                 new CountDownCooldownTicks(ModMemoryTypes.POLLINATING_COOLDOWN),
-                new CountDownCooldownTicks(COOLDOWN_LOCATE_HIVE),
+                new CountDownCooldownTicks(ModMemoryTypes.COOLDOWN_LOCATE_HIVE),
                 new CountDownCooldownTicks(MemoryModuleType.TEMPTATION_COOLDOWN_TICKS)));
 
     }

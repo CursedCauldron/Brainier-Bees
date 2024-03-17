@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "brainierbees",
-  "version": "1.4.3",
+  "version": "1.5",
   "icon": "assets/brainierbees/icon.png",
   "name": "Brainier Bees",
-  "description": "Rewrites Bees' AI to be smarter!",
+  "description": "Refactors, improves, and fixes Bee behavior in the modern Brain AI system!",
   "authors": [
     "dopadream"
   ],
@@ -13,7 +13,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "cursedcauldron.brainierbees.BrainierBees"
+      "com.dopadream.brainierbees.BrainierBees"
     ]
   },
   "accessWidener": "brainierbees.accesswidener",

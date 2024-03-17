@@ -1,4 +1,4 @@
-package cursedcauldron.brainierbees.ai.tasks;
+package com.dopadream.brainierbees.ai.tasks;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;

@@ -1,4 +1,4 @@
-package cursedcauldron.brainierbees.ai;
+package com.dopadream.brainierbees.ai;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;

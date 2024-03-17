@@ -1,6 +1,7 @@
-package cursedcauldron.brainierbees.ai.tasks;
+package com.dopadream.brainierbees.ai.tasks;
 
-import cursedcauldron.brainierbees.mixin.BeeAccessor;
+import com.dopadream.brainierbees.ai.ModMemoryTypes;
+import com.dopadream.brainierbees.mixin.BeeAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -8,13 +9,10 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.Bee;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-
-import static cursedcauldron.brainierbees.ai.ModMemoryTypes.*;
 
 public class PollinateFlowerTask extends Behavior<Bee> {
 
@@ -26,7 +24,7 @@ public class PollinateFlowerTask extends Behavior<Bee> {
 
 
     public PollinateFlowerTask() {
-        super(Map.of(FLOWER_POS, MemoryStatus.VALUE_PRESENT));
+        super(Map.of(ModMemoryTypes.FLOWER_POS, MemoryStatus.VALUE_PRESENT));
     }
 
 
@@ -34,16 +32,16 @@ public class PollinateFlowerTask extends Behavior<Bee> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Bee bee) {
-        return bee.getBrain().getMemory(FLOWER_POS).isPresent() && bee.getBrain().getMemory(POLLINATING_COOLDOWN).isEmpty() && !(bee.getBrain().getMemory(WANTS_HIVE).isPresent() && bee.getBrain().getMemory(WANTS_HIVE).get());
+        return bee.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty() && !(bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get());
     }
 
     @Override
     protected boolean canStillUse(ServerLevel serverLevel, Bee bee, long l) {
-        return bee.getBrain().getMemory(FLOWER_POS).isPresent() && bee.getBrain().getMemory(POLLINATING_COOLDOWN).isEmpty() && !(bee.getBrain().getMemory(WANTS_HIVE).isPresent() && bee.getBrain().getMemory(WANTS_HIVE).get());
+        return bee.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty() && !(bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get());
     }
 
     private boolean hasPollinatedLongEnough(Bee bee) {
-        return bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).isPresent() && bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get() > 400;
+        return bee.getBrain().getMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS).get() > 400;
     }
 
 
@@ -70,8 +68,8 @@ public class PollinateFlowerTask extends Behavior<Bee> {
         super.stop(serverLevel, bee, l);
         if (this.hasPollinatedLongEnough(bee)) {
             ((BeeAccessor)bee).invokeSetHasNectar(true);
-            bee.getBrain().eraseMemory(FLOWER_POS);
-            bee.getBrain().setMemory(POLLINATING_COOLDOWN, UniformInt.of(400, 400).sample(serverLevel.getRandom()));
+            bee.getBrain().eraseMemory(ModMemoryTypes.FLOWER_POS);
+            bee.getBrain().setMemory(ModMemoryTypes.POLLINATING_COOLDOWN, UniformInt.of(400, 400).sample(serverLevel.getRandom()));
         }
 
         this.stopPollinating();
@@ -93,16 +91,16 @@ public class PollinateFlowerTask extends Behavior<Bee> {
     @Override
     protected void tick(ServerLevel serverLevel, Bee bee, long l) {
         super.tick(serverLevel, bee, l);
-        if (bee.getBrain().getMemory(POLLINATING_TICKS).isPresent()) {
-            bee.getBrain().setMemory(POLLINATING_TICKS, bee.getBrain().getMemory(POLLINATING_TICKS).get() + 1);
+        if (bee.getBrain().getMemory(ModMemoryTypes.POLLINATING_TICKS).isPresent()) {
+            bee.getBrain().setMemory(ModMemoryTypes.POLLINATING_TICKS, bee.getBrain().getMemory(ModMemoryTypes.POLLINATING_TICKS).get() + 1);
         } else {
-            bee.getBrain().setMemory(POLLINATING_TICKS, 1);
+            bee.getBrain().setMemory(ModMemoryTypes.POLLINATING_TICKS, 1);
         }
-        if (bee.getBrain().getMemory(POLLINATING_TICKS).get() > 600) {
-            bee.getBrain().eraseMemory(FLOWER_POS);
-            bee.getBrain().setMemory(POLLINATING_TICKS, 0);
+        if (bee.getBrain().getMemory(ModMemoryTypes.POLLINATING_TICKS).get() > 600) {
+            bee.getBrain().eraseMemory(ModMemoryTypes.FLOWER_POS);
+            bee.getBrain().setMemory(ModMemoryTypes.POLLINATING_TICKS, 0);
         } else {
-            Vec3 vec3 = Vec3.atBottomCenterOf(bee.getBrain().getMemory(FLOWER_POS).get().pos()).add(0.0, 0.6F, 0.0);
+            Vec3 vec3 = Vec3.atBottomCenterOf(bee.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).get().pos()).add(0.0, 0.6F, 0.0);
             if (vec3.distanceTo(bee.position()) > 1.0) {
                 this.hoverPos = vec3;
                 this.setWantedPos(bee);
@@ -113,9 +111,9 @@ public class PollinateFlowerTask extends Behavior<Bee> {
 
                 boolean bl = bee.position().distanceTo(this.hoverPos) <= 0.1;
                 boolean bl2 = true;
-                if (!bl && bee.getBrain().getMemory(POLLINATING_TICKS).get() > 600) {
-                    bee.getBrain().eraseMemory(FLOWER_POS);
-                    bee.getBrain().setMemory(POLLINATING_TICKS, 0);
+                if (!bl && bee.getBrain().getMemory(ModMemoryTypes.POLLINATING_TICKS).get() > 600) {
+                    bee.getBrain().eraseMemory(ModMemoryTypes.FLOWER_POS);
+                    bee.getBrain().setMemory(ModMemoryTypes.POLLINATING_TICKS, 0);
                 } else {
                     if (bl) {
                         boolean bl3 = bee.getRandom().nextInt(25) == 0;
@@ -133,23 +131,23 @@ public class PollinateFlowerTask extends Behavior<Bee> {
                         this.setWantedPos(bee);
                     }
 
-                    if (bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).isPresent()) {
-                        bee.getBrain().setMemory(SUCCESSFUL_POLLINATING_TICKS, bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get() + 1);
+                    if (bee.getBrain().getMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS).isPresent()) {
+                        bee.getBrain().setMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS, bee.getBrain().getMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS).get() + 1);
                     } else {
-                        bee.getBrain().setMemory(SUCCESSFUL_POLLINATING_TICKS, 1);
+                        bee.getBrain().setMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS, 1);
                     }
-                    if (bee.getRandom().nextFloat() < 0.05F && bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get() > this.lastSoundPlayedTick + 59) {
-                        this.lastSoundPlayedTick = bee.getBrain().getMemory(SUCCESSFUL_POLLINATING_TICKS).get();
+                    if (bee.getRandom().nextFloat() < 0.05F && bee.getBrain().getMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS).get() > this.lastSoundPlayedTick + 59) {
+                        this.lastSoundPlayedTick = bee.getBrain().getMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS).get();
                         bee.playSound(SoundEvents.BEE_POLLINATE, 1.0F, 1.0F);
                     }
 
                 }
             }
         }
-        if(bee.getBrain().getMemory(FLOWER_POS).isPresent()) {
-            if (!serverLevel.getBlockState(bee.getBrain().getMemory(FLOWER_POS).get().pos()).is(BlockTags.FLOWERS)) {
-                bee.getBrain().eraseMemory(FLOWER_POS);
-                bee.getBrain().setMemory(POLLINATING_TICKS, 0);
+        if(bee.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isPresent()) {
+            if (!serverLevel.getBlockState(bee.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).get().pos()).is(BlockTags.FLOWERS)) {
+                bee.getBrain().eraseMemory(ModMemoryTypes.FLOWER_POS);
+                bee.getBrain().setMemory(ModMemoryTypes.POLLINATING_TICKS, 0);
             }
         }
     }

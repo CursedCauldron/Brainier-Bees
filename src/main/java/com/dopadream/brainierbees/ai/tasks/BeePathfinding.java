@@ -1,8 +1,7 @@
-package cursedcauldron.brainierbees.ai.tasks;
+package com.dopadream.brainierbees.ai.tasks;
 
-import cursedcauldron.brainierbees.BrainierBees;
-import cursedcauldron.brainierbees.ai.ModMemoryTypes;
-import cursedcauldron.brainierbees.util.SimpleConfig;
+import com.dopadream.brainierbees.BrainierBees;
+import com.dopadream.brainierbees.ai.ModMemoryTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -15,8 +14,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.pathfinder.Path;
 
 import java.util.Map;
-
-import static cursedcauldron.brainierbees.ai.ModMemoryTypes.HIVE_POS;
 
 public class BeePathfinding extends Behavior<Bee> {
     private BeePathfinding.CachedPathHolder beeCachedPathHolder;
@@ -36,12 +33,12 @@ public class BeePathfinding extends Behavior<Bee> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, Bee bee) {
-        return (bee.getNavigation().isDone() && bee.getRandom().nextInt(10) == 0  || !bee.getBrain().getMemory(HIVE_POS).isPresent());
+        return (bee.getNavigation().isDone() && bee.getRandom().nextInt(10) == 0  || !bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent());
     }
 
     @Override
     protected boolean canStillUse(ServerLevel serverLevel, Bee bee, long l) {
-        return (bee.getNavigation().isInProgress()  ||  !bee.getBrain().getMemory(HIVE_POS).isPresent());
+        return (bee.getNavigation().isInProgress()  ||  !bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent());
     }
 
     @Override
@@ -53,7 +50,7 @@ public class BeePathfinding extends Behavior<Bee> {
     }
 
     public static boolean blockCloserThan(Bee bee, BlockPos blockPos, int i) {
-        return blockPos.closerThan(bee.getBrain().getMemory(HIVE_POS).get().pos(), i);
+        return blockPos.closerThan(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos(), i);
     }
 
     public static CachedPathHolder smartBeesTM(Bee beeEntity, CachedPathHolder cachedPathHolder) {
@@ -83,7 +80,7 @@ public class BeePathfinding extends Behavior<Bee> {
                             beeEntity.getRandom().nextInt(21) - 10
                     );
                 }
-                if (beeEntity.getBrain().getMemory(HIVE_POS).isEmpty()) {
+                if (beeEntity.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isEmpty()) {
                     if (world.getBlockState(new BlockPos(mutable.getX(), mutable.getY()-2, mutable.getZ())).isAir()) {
                         break; // Valid spot to go towards. Homeless bees only!
                     }

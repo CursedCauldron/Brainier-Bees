@@ -1,4 +1,4 @@
-package cursedcauldron.brainierbees.util;
+package com.dopadream.brainierbees.util;
 
 
 /*
@@ -23,7 +23,7 @@ package cursedcauldron.brainierbees.util;
  * THE SOFTWARE.
  */
 
-import cursedcauldron.brainierbees.BrainierBees;
+import com.dopadream.brainierbees.BrainierBees;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

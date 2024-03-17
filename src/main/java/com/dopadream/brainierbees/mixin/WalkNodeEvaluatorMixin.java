@@ -1,4 +1,4 @@
-package cursedcauldron.brainierbees.mixin;
+package com.dopadream.brainierbees.mixin;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;

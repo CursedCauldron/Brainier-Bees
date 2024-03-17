@@ -1,4 +1,4 @@
-package cursedcauldron.brainierbees.mixin;
+package com.dopadream.brainierbees.mixin;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;

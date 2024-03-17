@@ -1,11 +1,11 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "cursedcauldron.brainierbees.mixin",
+  "package": "com.dopadream.brainierbees.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "BeeMixin",
     "BeeAccessor",
+    "BeeMixin",
     "MemoryModuleAccessor",
     "SensorTypeAccessor",
     "WalkNodeEvaluatorMixin"

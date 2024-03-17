@@ -1,7 +1,7 @@
-package cursedcauldron.brainierbees.ai;
+package com.dopadream.brainierbees.ai;
 
-import cursedcauldron.brainierbees.BrainierBees;
-import cursedcauldron.brainierbees.mixin.SensorTypeAccessor;
+import com.dopadream.brainierbees.BrainierBees;
+import com.dopadream.brainierbees.mixin.SensorTypeAccessor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.sensing.TemptingSensor;
 import org.jetbrains.annotations.NotNull;

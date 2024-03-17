@@ -1,12 +1,12 @@
-package cursedcauldron.brainierbees.mixin;
+package com.dopadream.brainierbees.mixin;
 
 
+import com.dopadream.brainierbees.ai.BeeBrain;
+import com.dopadream.brainierbees.ai.ModMemoryTypes;
+import com.dopadream.brainierbees.ai.ModSensorTypes;
+import com.dopadream.brainierbees.util.HiveAccessor;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
-import cursedcauldron.brainierbees.ai.BeeBrain;
-import cursedcauldron.brainierbees.ai.ModMemoryTypes;
-import cursedcauldron.brainierbees.ai.ModSensorTypes;
-import cursedcauldron.brainierbees.util.HiveAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
@@ -36,8 +36,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.UUID;
-
-import static cursedcauldron.brainierbees.ai.ModMemoryTypes.*;
 
 @Mixin(Bee.class)
 public abstract class BeeMixin extends Animal implements HiveAccessor {
@@ -92,12 +90,12 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
         if (this.persistentAngerTarget != null) {
             getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, getTarget());
         }
-        if (getBrain().getMemory(COOLDOWN_LOCATE_HIVE).isPresent()) {
-            if (getBrain().getMemory(COOLDOWN_LOCATE_HIVE).get() > 0 ) {
-                getBrain().setMemory(COOLDOWN_LOCATE_HIVE, getBrain().getMemory(COOLDOWN_LOCATE_HIVE).get() - 1);
+        if (getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).isPresent()) {
+            if (getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).get() > 0 ) {
+                getBrain().setMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE, getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).get() - 1);
             } else {
-                getBrain().eraseMemory(COOLDOWN_LOCATE_HIVE);
-                getBrain().eraseMemory(HIVE_BLACKLIST);
+                getBrain().eraseMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE);
+                getBrain().eraseMemory(ModMemoryTypes.HIVE_BLACKLIST);
             }
         }
 //        if (getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isPresent()) {
@@ -109,17 +107,17 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
 //            getBrain().setMemory(HIVE_POS, GlobalPos.of(level.dimension(), getHivePos()));
 //        }
 
-        if ((this.getMemorizedHome() == null) && (getBrain().getMemory(HIVE_POS).isPresent()) ) {
-            this.setMemorizedHome(getBrain().getMemory(HIVE_POS).get().pos());
+        if ((this.getMemorizedHome() == null) && (getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) ) {
+            this.setMemorizedHome(getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
         }
 
         if(this.getMemorizedHome() != null) {
-            getBrain().setMemory(HIVE_POS, GlobalPos.of(level.dimension(), (this.getMemorizedHome())));
+            getBrain().setMemory(ModMemoryTypes.HIVE_POS, GlobalPos.of(level.dimension(), (this.getMemorizedHome())));
         }
 
-        if (getBrain().getMemory(HIVE_POS).isPresent()) {
-            if (!(level.getBlockEntity(getBrain().getMemory(HIVE_POS).get().pos()) instanceof BeehiveBlockEntity)) {
-                if (getBrain().getMemory(HIVE_POS).isPresent()) {
+        if (getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) {
+            if (!(level.getBlockEntity(getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos()) instanceof BeehiveBlockEntity)) {
+                if (getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) {
                     this.removeMemorizedHive($this);
                 }
             } else {
@@ -132,9 +130,9 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
 
 
         if (newWantsHive()) {
-            $this.getBrain().setMemory(WANTS_HIVE, true);
+            $this.getBrain().setMemory(ModMemoryTypes.WANTS_HIVE, true);
         } else {
-            $this.getBrain().eraseMemory(WANTS_HIVE);
+            $this.getBrain().eraseMemory(ModMemoryTypes.WANTS_HIVE);
         }
     }
 
@@ -152,10 +150,10 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
 
     private boolean newHiveNearFire() {
         Bee bee = (Bee) (Object) this;
-        if (bee.getBrain().getMemory(HIVE_POS).isEmpty()) {
+        if (bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isEmpty()) {
             return false;
         } else {
-            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(HIVE_POS).get().pos());
+            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
             return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity)blockEntity).isFireNearby();
         }
     }

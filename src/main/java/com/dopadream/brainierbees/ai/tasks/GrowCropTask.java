@@ -1,6 +1,6 @@
-package cursedcauldron.brainierbees.ai.tasks;
+package com.dopadream.brainierbees.ai.tasks;
 
-import cursedcauldron.brainierbees.mixin.BeeAccessor;
+import com.dopadream.brainierbees.mixin.BeeAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;

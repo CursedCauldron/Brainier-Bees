@@ -1,8 +1,8 @@
-package cursedcauldron.brainierbees.ai.tasks;
+package com.dopadream.brainierbees.ai.tasks;
 
+import com.dopadream.brainierbees.BrainierBees;
+import com.dopadream.brainierbees.ai.ModMemoryTypes;
 import com.google.common.collect.Lists;
-import cursedcauldron.brainierbees.BrainierBees;
-import cursedcauldron.brainierbees.ai.ModMemoryTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -18,8 +18,6 @@ import net.minecraft.world.level.pathfinder.Path;
 import java.util.List;
 import java.util.Map;
 
-import static cursedcauldron.brainierbees.ai.ModMemoryTypes.WANTS_HIVE;
-
 public class FindFlowerTask extends Behavior<Bee> {
 
     private BlockPos flowerPosPublic;
@@ -31,12 +29,12 @@ public class FindFlowerTask extends Behavior<Bee> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, Bee entity) {
-        return !entity.hasNectar() || (entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty() && entity.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty()) &&  !(entity.getBrain().getMemory(WANTS_HIVE).isPresent() && entity.getBrain().getMemory(WANTS_HIVE).get());
+        return !entity.hasNectar() || (entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty() && entity.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty()) &&  !(entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get());
     }
 
     @Override
     protected boolean canStillUse(ServerLevel world, Bee entity, long l) {
-        return !entity.hasNectar() || (entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty() && entity.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty()) &&  !(entity.getBrain().getMemory(WANTS_HIVE).isPresent() && entity.getBrain().getMemory(WANTS_HIVE).get());
+        return !entity.hasNectar() || (entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty() && entity.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty()) &&  !(entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get());
     }
 
     public BlockPos getFlowerPos(Bee entity, ServerLevel level) {

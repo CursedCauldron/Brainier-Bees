@@ -1,9 +1,8 @@
-package cursedcauldron.brainierbees.ai;
+package com.dopadream.brainierbees.ai;
 
 import com.mojang.serialization.Codec;
-import cursedcauldron.brainierbees.BrainierBees;
-import cursedcauldron.brainierbees.mixin.MemoryModuleAccessor;
-import net.minecraft.core.BlockPos;
+import com.dopadream.brainierbees.BrainierBees;
+import com.dopadream.brainierbees.mixin.MemoryModuleAccessor;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;

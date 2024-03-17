@@ -1,8 +1,7 @@
-package cursedcauldron.brainierbees.ai.tasks;
+package com.dopadream.brainierbees.ai.tasks;
 
-import cursedcauldron.brainierbees.ai.ModMemoryTypes;
-import cursedcauldron.brainierbees.mixin.BeeAccessor;
-import cursedcauldron.brainierbees.util.HiveAccessor;
+import com.dopadream.brainierbees.ai.ModMemoryTypes;
+import com.dopadream.brainierbees.util.HiveAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -21,8 +20,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static cursedcauldron.brainierbees.ai.ModMemoryTypes.*;
-
 public class LocateHiveTask extends Behavior<Bee> {
 
     private ServerLevel level;
@@ -33,7 +30,7 @@ public class LocateHiveTask extends Behavior<Bee> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Bee bee) {
-        return bee.getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).isEmpty() && bee.getBrain().getMemory(HIVE_POS).isEmpty();
+        return bee.getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).isEmpty() && bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isEmpty();
     }
 
     @Override
@@ -49,8 +46,8 @@ public class LocateHiveTask extends Behavior<Bee> {
         List<BlockPos> list = this.findNearbyHivesWithSpace(level, bee);
         if (!list.isEmpty()) {
             for(BlockPos blockPos : list) {
-                if (bee.getBrain().getMemory(HIVE_BLACKLIST).isEmpty() || !bee.getBrain().getMemory(HIVE_BLACKLIST).get().contains(GlobalPos.of(bee.level().dimension(), blockPos))) {
-                    bee.getBrain().setMemory(HIVE_POS, GlobalPos.of(level.dimension(), blockPos));
+                if (bee.getBrain().getMemory(ModMemoryTypes.HIVE_BLACKLIST).isEmpty() || !bee.getBrain().getMemory(ModMemoryTypes.HIVE_BLACKLIST).get().contains(GlobalPos.of(bee.level().dimension(), blockPos))) {
+                    bee.getBrain().setMemory(ModMemoryTypes.HIVE_POS, GlobalPos.of(level.dimension(), blockPos));
 //                    ((BeeAccessor)bee).setHivePos(blockPos);
                     ((HiveAccessor)bee).setMemorizedHome(blockPos);
                     return;

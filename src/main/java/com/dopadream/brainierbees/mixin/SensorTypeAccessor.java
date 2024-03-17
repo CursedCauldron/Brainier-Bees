@@ -1,4 +1,4 @@
-package cursedcauldron.brainierbees.mixin;
+package com.dopadream.brainierbees.mixin;
 
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
