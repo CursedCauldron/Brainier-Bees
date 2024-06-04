@@ -68,7 +68,7 @@ public class GoToHiveTask extends Behavior<Bee> {
     protected void tick(ServerLevel level, Bee bee, long l) {
         if (bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) {
             bee.getBrain().setMemory(ModMemoryTypes.TRAVELLING_TICKS, bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).get() + 1);
-            if (bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).get() > (26 * (new BrainierBees().MAX_WANDER_RADIUS))) {
+            if (bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).get() > (78 * (new BrainierBees().MAX_WANDER_RADIUS))) {
                 ((HiveAccessor) bee).dropAndBlacklistHive(bee);
             } else if (!bee.getNavigation().isInProgress()) {
                 this.pathfindDirectlyTowards(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos(), bee);

@@ -64,7 +64,7 @@ public class EnterHiveTask extends Behavior<Bee> {
         if (bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) {
             BlockEntity blockEntity = serverLevel.getBlockEntity(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
             if (blockEntity instanceof BeehiveBlockEntity beehiveBlockEntity) {
-                beehiveBlockEntity.addOccupant(bee, bee.hasNectar());
+                beehiveBlockEntity.addOccupant(bee);
             }
         }
         super.start(serverLevel, bee, l);
