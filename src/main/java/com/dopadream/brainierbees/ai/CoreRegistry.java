@@ -19,7 +19,7 @@ public class CoreRegistry<T> {
     }
 
     public <E extends T> E register(String key, E entry) {
-        return Registry.register(this.registry, new ResourceLocation(this.modId, key), entry);
+        return Registry.register(this.registry, ResourceLocation.fromNamespaceAndPath(this.modId, key), entry);
     }
 
     public void register() {

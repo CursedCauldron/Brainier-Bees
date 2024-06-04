@@ -26,7 +26,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -68,9 +68,9 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void Bee(EntityType entityType, Level level, CallbackInfo ci) {
-        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 8.0F);
-        this.setPathfindingMalus(BlockPathTypes.TRAPDOOR, 8.0F);
-        this.setPathfindingMalus(BlockPathTypes.WATER, -3.0F);
+        this.setPathfindingMalus(PathType.DANGER_FIRE, 8.0F);
+        this.setPathfindingMalus(PathType.TRAPDOOR, 8.0F);
+        this.setPathfindingMalus(PathType.WATER, -3.0F);
     }
 
     @Inject(method = "registerGoals", at = @At("RETURN"))
@@ -170,9 +170,6 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
     public void readAdditionalSaveData(CompoundTag compoundTag, CallbackInfo ci) {
         this.HoneyCooldown = compoundTag.getInt("HoneyCooldown");
-        if (compoundTag.contains("MemorizedHome")) {
-            this.setMemorizedHome(NbtUtils.readBlockPos(compoundTag.getCompound("MemorizedHome")));
-        }
     }
 
     @Inject(method = "getBreedOffspring(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/AgeableMob;)Lnet/minecraft/world/entity/animal/Bee;", at = @At("HEAD"))
@@ -188,13 +185,12 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
     }
 
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData) {
         Bee $this = (Bee) (Object) this;
         RandomSource randomSource = serverLevelAccessor.getRandom();
         BeeBrain.initMemories($this, randomSource);
-        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
     }
-
 
     public Brain.Provider<Bee> brainProvider() {
         return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
