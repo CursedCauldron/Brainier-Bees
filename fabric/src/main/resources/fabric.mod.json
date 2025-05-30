@@ -3,9 +3,9 @@
   "id": "brainier_bees",
   "version": "${version}",
   "name": "Brainier Bees",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Refactors Bee behavior using Mojang's Brain AI system",
   "authors": [
-    "Me!"
+    "dopadream"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
@@ -16,10 +16,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.dopadream.fabric.ExampleModFabric"
+      "io.github.dopadream.fabric.BrainierBeesFabric"
     ],
     "client": [
-      "io.github.dopadream.fabric.client.ExampleModFabricClient"
+      "io.github.dopadream.fabric.client.BrainierBeesFabricClient"
     ]
   },
   "mixins": [

@@ -7,9 +7,9 @@ license = "Insert License Here"
 modId = "brainier_bees"
 version = "${version}"
 displayName = "Brainier Bees"
-authors = "Me!"
+authors = "dopadream"
 description = '''
-This is an example description! Tell everyone what your mod is about!
+Refactors Bee behavior using Mojang's Brain AI system
 '''
 #logoFile = ""
 

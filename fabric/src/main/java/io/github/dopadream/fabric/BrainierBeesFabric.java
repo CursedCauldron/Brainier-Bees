@@ -2,9 +2,9 @@ package io.github.dopadream.fabric;
 
 import net.fabricmc.api.ModInitializer;
 
-import io.github.dopadream.ExampleMod;
+import io.github.dopadream.BrainierBees;
 
-public final class ExampleModFabric implements ModInitializer {
+public final class BrainierBeesFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         // This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -12,6 +12,6 @@ public final class ExampleModFabric implements ModInitializer {
         // Proceed with mild caution.
 
         // Run our common setup.
-        ExampleMod.init();
+        BrainierBees.init();
     }
 }
