@@ -6,6 +6,8 @@
   "client": [
   ],
   "mixins": [
+    "BeeAccessor",
+    "WalkNodeEvaluatorMixin"
   ],
   "injectors": {
     "defaultRequire": 1
