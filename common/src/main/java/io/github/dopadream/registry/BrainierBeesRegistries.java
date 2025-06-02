@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import io.github.dopadream.BrainierBees;
-import io.github.dopadream.ai.BeeBrain;
+import io.github.dopadream.ai.BeeAi;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -27,7 +27,7 @@ public class BrainierBeesRegistries {
 
     public static final RegistrySupplier<SensorType<TemptingSensor>> BEE_TEMPTATIONS =
             SENSOR_TYPES.register("bee_temptations",
-                    () -> new SensorType<>(() -> new TemptingSensor(BeeBrain.getTemptations())));
+                    () -> new SensorType<>(() -> new TemptingSensor(BeeAi.getTemptations())));
 
 
     // Memory Modules
@@ -47,7 +47,7 @@ public class BrainierBeesRegistries {
 
     public static final RegistrySupplier<MemoryModuleType<Path>> LAST_PATH = MEMORY_MODULES.register("last_path", () -> new MemoryModuleType<>(Optional.empty()));
 
-    public static void init(){
+    public static void  init(){
         BrainierBees.LOGGER.debug("Registries initialized for Brainier Bees");
     }
 }

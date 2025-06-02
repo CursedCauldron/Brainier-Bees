@@ -1,6 +1,7 @@
 package io.github.dopadream.config;
 
 
+
 /*
  * Copyright (c) 2021 magistermaks
  *
@@ -121,6 +122,7 @@ public class SimpleConfig {
         for( int line = 1; reader.hasNextLine(); line ++ ) {
             parseConfigEntry( reader.nextLine(), line );
         }
+        reader.close();
     }
 
     private void parseConfigEntry( String entry, int line ) {
@@ -250,3 +252,4 @@ public class SimpleConfig {
     }
 
 }
+
