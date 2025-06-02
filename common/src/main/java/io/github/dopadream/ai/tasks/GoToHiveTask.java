@@ -2,7 +2,7 @@ package io.github.dopadream.ai.tasks;
 
 
 import io.github.dopadream.config.BrainierBeesConfig;
-import io.github.dopadream.mixin.HiveAccessor;
+import io.github.dopadream.util.HiveAccessor;
 import io.github.dopadream.registry.BrainierBeesRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;

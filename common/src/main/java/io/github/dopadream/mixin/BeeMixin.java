@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import io.github.dopadream.ai.BeeAi;
 import io.github.dopadream.registry.BrainierBeesRegistries;
+import io.github.dopadream.util.HiveAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
@@ -211,7 +212,8 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
                 SensorType.HURT_BY,
                 SensorType.NEAREST_ADULT,
                 SensorType.NEAREST_LIVING_ENTITIES,
-                BrainierBeesRegistries.BEE_TEMPTATIONS.get());
+                BrainierBeesRegistries.BEE_TEMPTATIONS.listen();
+        );
         MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH,
                 MemoryModuleType.BREED_TARGET,
                 MemoryModuleType.NEAREST_LIVING_ENTITIES,
