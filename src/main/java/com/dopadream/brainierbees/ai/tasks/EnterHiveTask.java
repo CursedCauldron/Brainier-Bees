@@ -1,6 +1,6 @@
 package com.dopadream.brainierbees.ai.tasks;
 
-import com.dopadream.brainierbees.ai.ModMemoryTypes;
+import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.dopadream.brainierbees.mixin.BeeAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -13,14 +13,13 @@ import java.util.Map;
 
 public class EnterHiveTask extends Behavior<Bee> {
 
-
     public EnterHiveTask() {
         super(Map.of(ModMemoryTypes.HIVE_POS, MemoryStatus.VALUE_PRESENT));
     }
 
     public boolean wantsToEnterHive(ServerLevel level, Bee bee) {
         if (((BeeAccessor)bee).getStayOutOfHiveCountdown() <= 0 && !bee.hasStung() && bee.getTarget() == null) {
-            boolean bl = level.isRaining() || level.isNight() || bee.hasNectar();
+            boolean bl = level.isRaining() || level.isMoonVisible() || bee.hasNectar();
             return bl && !this.isHiveNearFire(level, bee);
         } else {
             return false;
@@ -51,13 +50,6 @@ public class EnterHiveTask extends Behavior<Bee> {
         }
         return false;
     }
-
-    @Override
-    protected boolean canStillUse(ServerLevel serverLevel, Bee livingEntity, long l) {
-        return false;
-    }
-
-
 
     @Override
     protected void start(ServerLevel serverLevel, Bee bee, long l) {

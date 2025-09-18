@@ -1,8 +1,10 @@
 package com.dopadream.brainierbees.ai.tasks;
 
 import com.dopadream.brainierbees.BrainierBees;
-import com.dopadream.brainierbees.ai.ModMemoryTypes;
+import com.dopadream.brainierbees.config.BrainierBeesConfig;
+import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -12,8 +14,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class BeePathfinding extends Behavior<Bee> {
     private BeePathfinding.CachedPathHolder beeCachedPathHolder;
@@ -33,12 +37,12 @@ public class BeePathfinding extends Behavior<Bee> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, Bee bee) {
-        return (bee.getNavigation().isDone() && bee.getRandom().nextInt(10) == 0  || !bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent());
+        return (bee.getNavigation().isDone() && bee.getRandom().nextInt(10) == 0);
     }
 
     @Override
     protected boolean canStillUse(ServerLevel serverLevel, Bee bee, long l) {
-        return (bee.getNavigation().isInProgress()  ||  !bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent());
+        return (bee.getNavigation().isInProgress());
     }
 
     @Override
@@ -53,13 +57,13 @@ public class BeePathfinding extends Behavior<Bee> {
         return blockPos.closerThan(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos(), i);
     }
 
-    public static CachedPathHolder smartBeesTM(Bee beeEntity, CachedPathHolder cachedPathHolder) {
+    public static void smartBeesTM(Bee beeEntity, CachedPathHolder cachedPathHolder) {
 
         if(cachedPathHolder == null || cachedPathHolder.pathTimer > 50 || cachedPathHolder.cachedPath == null ||
                 (beeEntity.getDeltaMovement().length() <= 0.05d && cachedPathHolder.pathTimer > 5) ||
                 beeEntity.blockPosition().distManhattan(cachedPathHolder.cachedPath.getTarget()) <= 4)
         {
-            Level world = beeEntity.level;
+            Level world = beeEntity.level();
             BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos().set(beeEntity.blockPosition());
             LevelChunk levelChunk = world.getChunkAt(mutable);
             int height = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, mutable.getX(), mutable.getZ()) + 1;
@@ -67,30 +71,57 @@ public class BeePathfinding extends Behavior<Bee> {
             for(int attempt = 0; attempt < 11 || beeEntity.blockPosition().distManhattan(mutable) <= 5; attempt++) {
                 // pick a random place to fly to
 
-                if  ((world.dimensionType().hasCeiling()) || (beeEntity.getBlockY() <= (height + 3))) {
-                    mutable.set(beeEntity.blockPosition()).move(
-                            beeEntity.getRandom().nextInt(21) - 10,
-                            beeEntity.getRandom().nextInt(6) - 2,
-                            beeEntity.getRandom().nextInt(21) - 10
-                    );
-                } else {
-                    mutable.set(beeEntity.blockPosition()).move(
-                            beeEntity.getRandom().nextInt(21) - 10,
-                            beeEntity.getRandom().nextInt(6) - 5,
-                            beeEntity.getRandom().nextInt(21) - 10
-                    );
-                }
-                if (beeEntity.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isEmpty()) {
-                    if (world.getBlockState(new BlockPos(mutable.getX(), mutable.getY()-2, mutable.getZ())).isAir()) {
-                        break; // Valid spot to go towards. Homeless bees only!
+                if (!beeEntity.isLeashed()) {
+                    if ((world.dimensionType().hasCeiling()) || (beeEntity.getBlockY() <= (height + 3))) {
+                        mutable.set(beeEntity.blockPosition()).move(
+                                beeEntity.getRandom().nextInt(21) - 10,
+                                beeEntity.getRandom().nextInt(6) - 2,
+                                beeEntity.getRandom().nextInt(21) - 10
+                        );
+                    } else {
+                        mutable.set(beeEntity.blockPosition()).move(
+                                beeEntity.getRandom().nextInt(21) - 10,
+                                beeEntity.getRandom().nextInt(6) - 5,
+                                beeEntity.getRandom().nextInt(21) - 10
+                        );
                     }
                 } else {
-                    if (blockCloserThan(beeEntity, mutable, new BrainierBees().MAX_WANDER_RADIUS) && world.getBlockState(new BlockPos(mutable.getX(), mutable.getY()-2, mutable.getZ())).isAir()) {
-                        break; // Valid spot to go towards within a set radius of their home (if they have one!)
+                    mutable.set(beeEntity.blockPosition()).move(
+                            beeEntity.getRandom().nextInt(5) - 2,
+                            beeEntity.getRandom().nextInt(5) - 2,
+                            beeEntity.getRandom().nextInt(5) - 2
+                    );
+                }
+
+                if (!beeEntity.isLeashed()) {
+                    if (beeEntity.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isEmpty()) {
+                        if (world.getBlockState(new BlockPos(mutable.getX(), mutable.getY() - 2, mutable.getZ())).isAir()) {
+                            break; // Valid spot to go towards. Homeless bees only!
+                        }
+                    } else {
+                        if (world.getBlockState(new BlockPos(mutable.getX(), mutable.getY() - 2, mutable.getZ())).isAir()) {
+                            if (!blockCloserThan(beeEntity, mutable, BrainierBeesConfig.MAX_WANDER_RADIUS)) {
+                                Vec3 hivePos = Vec3.atCenterOf(beeEntity.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
+                                mutable.set(
+                                        lerp(beeEntity.position(), hivePos, 0.25)
+                                );
+                                break;
+                            }
+                            break; // Valid spot to go towards within a set radius of their home (if they have one!)
+                        }
+                    }
+                } else {
+                    if (world.getBlockState(new BlockPos(mutable.getX(), mutable.getY() - 2, mutable.getZ())).isAir()) {
+                        if (beeEntity.getLeashData() != null) {
+                            mutable.set(
+                                    lerp(mutable.getCenter(), Objects.requireNonNull(beeEntity.getLeashData().leashHolder).position(), 0.25)
+                            );
+                            break;
+                        }
                     }
                 }
             }
-
+            BrainierBees.LOGGER.info(mutable.getX() + " " + mutable.getZ());
             Path newPath = beeEntity.getNavigation().createPath(mutable, 1);
             beeEntity.getNavigation().moveTo(newPath, 1);
 
@@ -105,7 +136,13 @@ public class BeePathfinding extends Behavior<Bee> {
             cachedPathHolder.pathTimer += 1;
         }
 
-        return cachedPathHolder;
+    }
+
+    public static Vec3i lerp(Vec3 current, Vec3 target, double t) {
+        double x = current.x + (target.x - current.x) * t;
+        double y = current.y + (target.y - current.y) * t;
+        double z = current.z + (target.z - current.z) * t;
+        return new Vec3i((int) x, (int) y, (int) z);
     }
 
     public static class CachedPathHolder {

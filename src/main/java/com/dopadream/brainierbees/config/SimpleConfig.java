@@ -1,4 +1,4 @@
-package com.dopadream.brainierbees.util;
+package com.dopadream.brainierbees.config;
 
 
 /*

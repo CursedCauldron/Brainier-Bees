@@ -1,6 +1,7 @@
 package com.dopadream.brainierbees.ai;
 
 import com.dopadream.brainierbees.ai.tasks.*;
+import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
@@ -14,15 +15,15 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Predicate;
 
-public class BeeBrain {
+public class BeeAi {
     private static final UniformInt TIME_BETWEEN_POLLINATING = UniformInt.of(10, 15);
     private static final UniformInt ADULT_FOLLOW_RANGE = UniformInt.of(3, 16);
 
-    public BeeBrain() {
+    public BeeAi() {
     }
 
     public static void initMemories(Bee bee, RandomSource randomSource) {
@@ -40,8 +41,6 @@ public class BeeBrain {
         return brain;
     }
 
-
-
     private static void initStingActivity(Brain<Bee> brain) {
         brain.addActivityAndRemoveMemoryWhenStopped(
                 Activity.FIGHT,
@@ -49,8 +48,9 @@ public class BeeBrain {
                 ImmutableList.of(
                         StopAttackingIfTargetInvalid.create(),
                         SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1F),
-                        BeeAttackTask.create(20),
-                        EraseMemoryIf.create(Predicate.not(Bee::isAngry), MemoryModuleType.ATTACK_TARGET)
+                        MeleeAttack.create(20),
+                        EraseMemoryIf.create(Predicate.not(Bee::isAngry), MemoryModuleType.ATTACK_TARGET),
+                        EraseMemoryIf.create(Bee::hasStung, MemoryModuleType.ATTACK_TARGET)
                 ),
                 MemoryModuleType.ATTACK_TARGET
         );
@@ -67,7 +67,7 @@ public class BeeBrain {
                         Pair.of(1, new PollinateFlowerTask()),
                         Pair.of(2, EraseMemoryIf.create(Bee::hasNectar, ModMemoryTypes.FLOWER_POS)),
                         Pair.of(3, EraseMemoryIf.create(Bee::wantsToEnterHive, ModMemoryTypes.FLOWER_POS))
-                        ),
+                ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.TEMPTING_PLAYER, MemoryStatus.VALUE_ABSENT),
                         Pair.of(MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT),
@@ -92,16 +92,16 @@ public class BeeBrain {
         brain.addActivityWithConditions(
                 Activity.IDLE,
                 ImmutableList.of(
-                        Pair.of(9, new FloatTask()),
-                        Pair.of(9, new GrowCropTask()),
-                        Pair.of(3, new AnimalMakeLove(EntityType.BEE)),
-                        Pair.of(4, new BetterFollowTemptation(livingEntity -> 0.6F)),
-                        Pair.of(1, BabyFollowAdult.create(ADULT_FOLLOW_RANGE, 1.25F)),
-                        Pair.of(5, new LocateHiveTask()),
-                        Pair.of(0, new GoToHiveTask()),
+                        Pair.of(0, new FloatTask()),
+                        Pair.of(1, new GoToHiveTask()),
                         Pair.of(2, new EnterHiveTask()),
+                        Pair.of(3, new FollowTemptation(livingEntity -> 0.6F)),
+                        Pair.of(4, BabyFollowAdult.create(ADULT_FOLLOW_RANGE, 1.25F)),
+                        Pair.of(5, new AnimalMakeLove(EntityType.BEE)),
+                        Pair.of(6, new LocateHiveTask()),
+                        Pair.of(7, new GrowCropTask()),
                         Pair.of(
-                                9,
+                                8,
                                 new RunOne(
                                         ImmutableList.of(
                                                 Pair.of(new BeePathfinding(), 1))
@@ -119,7 +119,7 @@ public class BeeBrain {
     }
 
 
-    public static Ingredient getTemptations() {
-        return Ingredient.of(ItemTags.FLOWERS);
+    public static Predicate<ItemStack> getTemptations() {
+        return itemStack -> itemStack.is(ItemTags.BEE_FOOD);
     }
 }

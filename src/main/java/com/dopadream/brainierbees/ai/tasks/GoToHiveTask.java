@@ -1,7 +1,8 @@
 package com.dopadream.brainierbees.ai.tasks;
 
 import com.dopadream.brainierbees.BrainierBees;
-import com.dopadream.brainierbees.ai.ModMemoryTypes;
+import com.dopadream.brainierbees.config.BrainierBeesConfig;
+import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.dopadream.brainierbees.util.HiveAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -17,19 +18,10 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 
 public class GoToHiveTask extends Behavior<Bee> {
-    private static final Logger LOGGER = LogManager.getLogger(BrainierBees.MOD_ID);
 
     public GoToHiveTask() {
         super(Map.of(ModMemoryTypes.HIVE_POS, MemoryStatus.VALUE_PRESENT, ModMemoryTypes.COOLDOWN_LOCATE_HIVE, MemoryStatus.VALUE_ABSENT));
     }
-
-//    public boolean canBeeUse() {
-//        return Bee.this.hivePos != null
-//                && !Bee.this.hasRestriction()
-//                && Bee.this.wantsToEnterHive()
-//                && !this.hasReachedTarget(Bee.this.hivePos)
-//                && Bee.this.level.getBlockState(Bee.this.hivePos).is(BlockTags.BEEHIVES);
-//    }
 
 
     private boolean isHiveNearFire(ServerLevel level, Bee bee) {
@@ -68,7 +60,7 @@ public class GoToHiveTask extends Behavior<Bee> {
     protected void tick(ServerLevel level, Bee bee, long l) {
         if (bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) {
             bee.getBrain().setMemory(ModMemoryTypes.TRAVELLING_TICKS, bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).get() + 1);
-            if (bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).get() > (78 * (new BrainierBees().MAX_WANDER_RADIUS))) {
+            if (bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).get() > (78 * (BrainierBeesConfig.MAX_WANDER_RADIUS))) {
                 ((HiveAccessor) bee).dropAndBlacklistHive(bee);
             } else if (!bee.getNavigation().isInProgress()) {
                 this.pathfindDirectlyTowards(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos(), bee);
@@ -91,9 +83,6 @@ public class GoToHiveTask extends Behavior<Bee> {
                 bee.getBrain().setMemory(ModMemoryTypes.LAST_PATH, bee.getNavigation().getPath());
             }
         }
-//        if (bee.getBrain().getMemory(TRAVELLING_TICKS).isPresent()) {
-//            LOGGER.warn(bee.getBrain().getMemory(TRAVELLING_TICKS).get());
-//        }
     }
 
     private boolean pathfindDirectlyTowards(BlockPos blockPos, Bee bee) {
@@ -101,6 +90,4 @@ public class GoToHiveTask extends Behavior<Bee> {
         bee.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 1.0);
         return bee.getNavigation().getPath() != null && bee.getNavigation().getPath().canReach();
     }
-
-
 }

@@ -11,19 +11,17 @@ import java.util.Map;
 
 public class FloatTask extends Behavior<Bee> {
 
-
     public FloatTask() {
         super(Map.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
     }
 
-
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Bee bee) {
-        return bee.isInWater() && bee.getFluidHeight(FluidTags.WATER) > bee.getFluidJumpThreshold() || bee.isInLava();
+        return (bee.isInWater() && bee.getFluidHeight(FluidTags.WATER) > bee.getFluidJumpThreshold()) || bee.isInLava() || bee.isLeashed();
     }
 
     @Override
     protected void start(ServerLevel serverLevel, Bee bee, long l) {
-            bee.getJumpControl().jump();
+        bee.getJumpControl().jump();
     }
 }

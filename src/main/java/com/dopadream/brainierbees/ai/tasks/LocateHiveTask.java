@@ -1,6 +1,6 @@
 package com.dopadream.brainierbees.ai.tasks;
 
-import com.dopadream.brainierbees.ai.ModMemoryTypes;
+import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.dopadream.brainierbees.util.HiveAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LocateHiveTask extends Behavior<Bee> {
-
     private ServerLevel level;
 
     public LocateHiveTask() {
@@ -48,8 +47,7 @@ public class LocateHiveTask extends Behavior<Bee> {
             for(BlockPos blockPos : list) {
                 if (bee.getBrain().getMemory(ModMemoryTypes.HIVE_BLACKLIST).isEmpty() || !bee.getBrain().getMemory(ModMemoryTypes.HIVE_BLACKLIST).get().contains(GlobalPos.of(bee.level().dimension(), blockPos))) {
                     bee.getBrain().setMemory(ModMemoryTypes.HIVE_POS, GlobalPos.of(level.dimension(), blockPos));
-//                    ((BeeAccessor)bee).setHivePos(blockPos);
-                    ((HiveAccessor)bee).setMemorizedHome(blockPos);
+                    ((HiveAccessor)bee).brainier_bees$setMemorizedHome(blockPos);
                     return;
                 }
             }

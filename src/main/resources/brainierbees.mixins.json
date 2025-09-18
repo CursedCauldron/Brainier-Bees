@@ -7,7 +7,6 @@
     "BeeAccessor",
     "BeeMixin",
     "MemoryModuleAccessor",
-    "SensorTypeAccessor",
     "WalkNodeEvaluatorMixin"
   ],
   "client": [

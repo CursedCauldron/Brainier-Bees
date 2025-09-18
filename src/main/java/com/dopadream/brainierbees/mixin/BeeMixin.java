@@ -1,18 +1,18 @@
 package com.dopadream.brainierbees.mixin;
 
 
-import com.dopadream.brainierbees.ai.BeeBrain;
-import com.dopadream.brainierbees.ai.ModMemoryTypes;
-import com.dopadream.brainierbees.ai.ModSensorTypes;
+import com.dopadream.brainierbees.ai.BeeAi;
+import com.dopadream.brainierbees.registry.ModMemoryTypes;
+import com.dopadream.brainierbees.registry.ModSensorTypes;
 import com.dopadream.brainierbees.util.HiveAccessor;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
@@ -27,9 +27,13 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -40,23 +44,26 @@ import java.util.UUID;
 @Mixin(Bee.class)
 public abstract class BeeMixin extends Animal implements HiveAccessor {
 
+    @Unique
     private static final ImmutableList<SensorType<? extends Sensor<? super Bee>>> SENSOR_TYPES;
+    @Unique
     private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES;
 
-
-    private BlockPos memorizedHome;
+    @Unique
+    private BlockPos brainier_bees$memorizedHome;
 
     @Override
-    public BlockPos getMemorizedHome() {
-        return this.memorizedHome;
+    public BlockPos brainier_bees$getMemorizedHome() {
+        return this.brainier_bees$memorizedHome;
     }
 
     @Override
-    public void setMemorizedHome(BlockPos pos) {
-        this.memorizedHome = pos;
+    public void brainier_bees$setMemorizedHome(BlockPos pos) {
+        this.brainier_bees$memorizedHome = pos;
     }
 
-    public int HoneyCooldown;
+    @Unique
+    public int brainier_bees$HoneyCooldown;
 
     public BeeMixin(EntityType<? extends Bee> entityType, Level level) {
         super(entityType, level);
@@ -64,10 +71,8 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
 
     @Shadow private @Nullable UUID persistentAngerTarget;
 
-    @Shadow public @Nullable abstract BlockPos getHivePos();
-
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void Bee(EntityType entityType, Level level, CallbackInfo ci) {
+    public void Bee(EntityType<? extends Bee> entityType, Level level, CallbackInfo ci) {
         this.setPathfindingMalus(PathType.DANGER_FIRE, 8.0F);
         this.setPathfindingMalus(PathType.TRAPDOOR, 8.0F);
         this.setPathfindingMalus(PathType.WATER, -3.0F);
@@ -81,15 +86,18 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
     @Inject(method = "customServerAiStep", at = @At("RETURN"))
     public void aiStep(CallbackInfo ci) {
         Bee $this = (Bee) (Object) this;
-        $this.level.getProfiler().push("beeBrain");
-        this.getBrain().tick((ServerLevel) $this.level, $this);
-        $this.level.getProfiler().pop();
-        $this.level.getProfiler().push("beeActivityUpdate");
-        BeeBrain.updateActivity($this);
-        $this.level.getProfiler().pop();
+        ProfilerFiller profilerFiller = Profiler.get();
+        profilerFiller.push("beeBrain");
+        this.getBrain().tick((ServerLevel) $this.level(), $this);
+        profilerFiller.pop();
+        profilerFiller.push("beeActivityUpdate");
+        BeeAi.updateActivity($this);
+        profilerFiller.pop();
+
         if (this.persistentAngerTarget != null) {
             getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, getTarget());
         }
+
         if (getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).isPresent()) {
             if (getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).get() > 0 ) {
                 getBrain().setMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE, getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).get() - 1);
@@ -98,84 +106,81 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
                 getBrain().eraseMemory(ModMemoryTypes.HIVE_BLACKLIST);
             }
         }
-//        if (getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isPresent()) {
-//            System.out.println(getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).get());
-//        }
 
-
-//        if (getHivePos() != null) {
-//            getBrain().setMemory(HIVE_POS, GlobalPos.of(level.dimension(), getHivePos()));
-//        }
-
-        if ((this.getMemorizedHome() == null) && (getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) ) {
-            this.setMemorizedHome(getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
+        if ((this.brainier_bees$getMemorizedHome() == null) && (getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) ) {
+            this.brainier_bees$setMemorizedHome(getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
         }
 
-        if(this.getMemorizedHome() != null) {
-            getBrain().setMemory(ModMemoryTypes.HIVE_POS, GlobalPos.of(level.dimension(), (this.getMemorizedHome())));
+        if(this.brainier_bees$getMemorizedHome() != null) {
+            getBrain().setMemory(ModMemoryTypes.HIVE_POS, new GlobalPos(level().dimension(), this.brainier_bees$getMemorizedHome()));
         }
 
         if (getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) {
-            if (!(level.getBlockEntity(getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos()) instanceof BeehiveBlockEntity)) {
+            if (!(level().getBlockEntity(getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos()) instanceof BeehiveBlockEntity)) {
                 if (getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) {
                     this.removeMemorizedHive($this);
                 }
-            } else {
-//                System.out.println(getBrain().getMemory(HIVE_POS).get());
             }
-            if (newHiveNearFire()) {
+            if (brainier_bees$newHiveNearFire()) {
                 this.removeMemorizedHive($this);
             }
         }
 
 
-        if (newWantsHive()) {
+        if (brainier_bees$newWantsHive()) {
             $this.getBrain().setMemory(ModMemoryTypes.WANTS_HIVE, true);
         } else {
             $this.getBrain().eraseMemory(ModMemoryTypes.WANTS_HIVE);
         }
     }
 
+    @Override
+    protected boolean shouldStayCloseToLeashHolder() {
+        return false;
+    }
 
-
-    public boolean newWantsHive() {
+    @Unique
+    public boolean brainier_bees$newWantsHive() {
         Bee bee = (Bee) (Object) this;
         if (((BeeAccessor)bee).getStayOutOfHiveCountdown() <= 0 && !bee.hasStung() && bee.getTarget() == null) {
-            boolean bl = level.isRaining() || level.isNight() || bee.hasNectar();
-            return bl && !this.newHiveNearFire();
+            boolean bl = level().isRaining() || level().isMoonVisible() || bee.hasNectar();
+            return bl && !this.brainier_bees$newHiveNearFire();
         } else {
             return false;
         }
     }
 
-    private boolean newHiveNearFire() {
+    @Unique
+    private boolean brainier_bees$newHiveNearFire() {
         Bee bee = (Bee) (Object) this;
         if (bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isEmpty()) {
             return false;
         } else {
-            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
+            BlockEntity blockEntity = level().getBlockEntity(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
             return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity)blockEntity).isFireNearby();
         }
     }
 
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
-    public void addAdditionalSaveData(CompoundTag compoundTag, CallbackInfo ci) {
-        compoundTag.putInt("HoneyCooldown", this.HoneyCooldown);
-        if (this.getMemorizedHome() != null) {
-            compoundTag.put("MemorizedHome", NbtUtils.writeBlockPos(this.getMemorizedHome()));
+    public void addAdditionalSaveData(ValueOutput valueOutput, CallbackInfo ci) {
+        valueOutput.putInt("HoneyCooldown", this.brainier_bees$HoneyCooldown);
+        if (this.brainier_bees$getMemorizedHome() != null) {
+            valueOutput.storeNullable("MemorizedHome", BlockPos.CODEC, this.brainier_bees$getMemorizedHome());
         }
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
-    public void readAdditionalSaveData(CompoundTag compoundTag, CallbackInfo ci) {
-        this.HoneyCooldown = compoundTag.getInt("HoneyCooldown");
+    public void readAdditionalSaveData(ValueInput valueInput, CallbackInfo ci) {
+        if (valueInput.getInt("HoneyCooldown").isPresent()) {
+            this.brainier_bees$HoneyCooldown = valueInput.getInt("HoneyCooldown").get();
+        }
     }
 
     @Inject(method = "getBreedOffspring(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/AgeableMob;)Lnet/minecraft/world/entity/animal/Bee;", at = @At("HEAD"))
     public void getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob, CallbackInfoReturnable<Bee> cir) {
         if (ageableMob != null) {
-            BeeBrain.initMemories((Bee) ageableMob, ageableMob.getRandom());
+            BeeAi.initMemories((Bee) ageableMob, ageableMob.getRandom());
         }
     }
 
@@ -185,27 +190,25 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
     }
 
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData) {
+    public @NotNull SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason spawnReason, @Nullable SpawnGroupData spawnGroupData) {
         Bee $this = (Bee) (Object) this;
         RandomSource randomSource = serverLevelAccessor.getRandom();
-        BeeBrain.initMemories($this, randomSource);
-        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+        BeeAi.initMemories($this, randomSource);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, spawnReason, spawnGroupData);
     }
 
-    public Brain.Provider<Bee> brainProvider() {
+    public Brain.@NotNull Provider<Bee> brainProvider() {
         return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
     }
 
-    public Brain<?> makeBrain(Dynamic<?> dynamic) {
-        return BeeBrain.makeBrain(this.brainProvider().makeBrain(dynamic));
+    public @NotNull Brain<?> makeBrain(Dynamic<?> dynamic) {
+        return BeeAi.makeBrain(this.brainProvider().makeBrain(dynamic));
     }
 
-    public Brain<Bee> getBrain() {
+    @SuppressWarnings("unchecked")
+    public @NotNull Brain<Bee> getBrain() {
         return (Brain<Bee>) super.getBrain();
     }
-
-
-
 
     static {
         SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES,
@@ -213,7 +216,8 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
                 SensorType.HURT_BY,
                 SensorType.NEAREST_ADULT,
                 SensorType.NEAREST_LIVING_ENTITIES,
-                ModSensorTypes.BEE_TEMPTATIONS);
+                ModSensorTypes.BEE_TEMPTATIONS
+        );
         MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH,
                 MemoryModuleType.BREED_TARGET,
                 MemoryModuleType.NEAREST_LIVING_ENTITIES,

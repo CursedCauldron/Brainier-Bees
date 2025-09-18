@@ -1,7 +1,8 @@
 package com.dopadream.brainierbees.ai.tasks;
 
 import com.dopadream.brainierbees.BrainierBees;
-import com.dopadream.brainierbees.ai.ModMemoryTypes;
+import com.dopadream.brainierbees.config.BrainierBeesConfig;
+import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 public class FindFlowerTask extends Behavior<Bee> {
-
     private BlockPos flowerPosPublic;
 
 
@@ -38,7 +38,7 @@ public class FindFlowerTask extends Behavior<Bee> {
     }
 
     public BlockPos getFlowerPos(Bee entity, ServerLevel level) {
-        int radius = new BrainierBees().FLOWER_LOCATE_RANGE;
+        int radius = BrainierBeesConfig.FLOWER_LOCATE_RANGE;
         List<BlockPos> possibles = Lists.newArrayList();
         for (int x = -radius; x <= radius; x++) {
             for (int z = -radius; z <= radius; z++) {

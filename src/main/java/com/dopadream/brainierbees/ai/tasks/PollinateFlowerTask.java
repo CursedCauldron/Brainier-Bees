@@ -1,6 +1,6 @@
 package com.dopadream.brainierbees.ai.tasks;
 
-import com.dopadream.brainierbees.ai.ModMemoryTypes;
+import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.dopadream.brainierbees.mixin.BeeAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -17,6 +17,7 @@ import java.util.Map;
 public class PollinateFlowerTask extends Behavior<Bee> {
 
 
+
     private int lastSoundPlayedTick;
     private boolean pollinating;
     @Nullable
@@ -26,9 +27,6 @@ public class PollinateFlowerTask extends Behavior<Bee> {
     public PollinateFlowerTask() {
         super(Map.of(ModMemoryTypes.FLOWER_POS, MemoryStatus.VALUE_PRESENT));
     }
-
-
-
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Bee bee) {
@@ -99,7 +97,7 @@ public class PollinateFlowerTask extends Behavior<Bee> {
         if (bee.getBrain().getMemory(ModMemoryTypes.POLLINATING_TICKS).get() > 600) {
             bee.getBrain().eraseMemory(ModMemoryTypes.FLOWER_POS);
             bee.getBrain().setMemory(ModMemoryTypes.POLLINATING_TICKS, 0);
-        } else {
+        } else if (bee.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isPresent()) {
             Vec3 vec3 = Vec3.atBottomCenterOf(bee.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).get().pos()).add(0.0, 0.6F, 0.0);
             if (vec3.distanceTo(bee.position()) > 1.0) {
                 this.hoverPos = vec3;

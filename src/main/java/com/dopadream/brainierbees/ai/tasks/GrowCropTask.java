@@ -45,35 +45,35 @@ public class GrowCropTask extends Behavior<Bee> {
         if (bee.getRandom().nextInt(1, 31) == 1) {
             for (int i = 1; i <= 2; ++i) {
                 BlockPos blockPos = bee.blockPosition().below(i);
-                BlockState blockState = level.getBlockState(blockPos);
+                BlockState blockState = bee.level().getBlockState(blockPos);
                 Block block = blockState.getBlock();
-                boolean bl = false;
-                IntegerProperty integerProperty = null;
+                BlockState blockState2 = null;
                 if (blockState.is(BlockTags.BEE_GROWABLES)) {
                     if (block instanceof CropBlock cropBlock) {
                         if (!cropBlock.isMaxAge(blockState)) {
-                            bl = true;
-                            integerProperty = cropBlock.getAgeProperty();
+                            blockState2 = cropBlock.getStateForAge(cropBlock.getAge(blockState) + 1);
                         }
                     } else if (block instanceof StemBlock) {
                         int j = blockState.getValue(StemBlock.AGE);
                         if (j < 7) {
-                            bl = true;
-                            integerProperty = StemBlock.AGE;
+                            blockState2 = blockState.setValue(StemBlock.AGE, j + 1);
                         }
                     } else if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
                         int j = blockState.getValue(SweetBerryBushBlock.AGE);
                         if (j < 3) {
-                            bl = true;
-                            integerProperty = SweetBerryBushBlock.AGE;
+                            blockState2 = blockState.setValue(SweetBerryBushBlock.AGE, j + 1);
                         }
                     } else if (blockState.is(Blocks.CAVE_VINES) || blockState.is(Blocks.CAVE_VINES_PLANT)) {
-                        ((BonemealableBlock) blockState.getBlock()).performBonemeal(level, bee.getRandom(), blockPos, blockState);
+                        BonemealableBlock bonemealableBlock = (BonemealableBlock)blockState.getBlock();
+                        if (bonemealableBlock.isValidBonemealTarget(bee.level(), blockPos, blockState)) {
+                            bonemealableBlock.performBonemeal((ServerLevel)bee.level(), bee.getRandom(), blockPos, blockState);
+                            blockState2 = bee.level().getBlockState(blockPos);
+                        }
                     }
 
-                    if (bl) {
-                        level.levelEvent(2005, blockPos, 0);
-                        level.setBlockAndUpdate(blockPos, blockState.setValue(integerProperty, Integer.valueOf(blockState.getValue(integerProperty) + 1)));
+                    if (blockState2 != null) {
+                        bee.level().levelEvent(2011, blockPos, 15);
+                        bee.level().setBlockAndUpdate(blockPos, blockState2);
                         ((BeeAccessor)bee).invokeIncrementNumCropsGrownSincePollination();
                     }
                 }

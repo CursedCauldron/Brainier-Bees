@@ -1,4 +1,4 @@
-package com.dopadream.brainierbees.ai;
+package com.dopadream.brainierbees.registry;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;

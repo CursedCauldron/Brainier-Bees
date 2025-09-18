@@ -1,4 +1,4 @@
-package com.dopadream.brainierbees.ai;
+package com.dopadream.brainierbees.registry;
 
 import com.mojang.serialization.Codec;
 import com.dopadream.brainierbees.BrainierBees;
@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.level.pathfinder.Path;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public class ModMemoryTypes {
     public static final MemoryModuleType<GlobalPos> HIVE_POS = register("hive_pos", GlobalPos.CODEC);
     public static final MemoryModuleType<Path> LAST_PATH = register("last_path");
 
-    public static final MemoryModuleType<List<GlobalPos>> HIVE_BLACKLIST = register("hive_blacklist");
+    public static final MemoryModuleType<LinkedList<GlobalPos>> HIVE_BLACKLIST = register("hive_blacklist");
 
     public static final MemoryModuleType<Integer> POLLINATING_COOLDOWN = register("pollinating_cooldown", Codec.INT);
     public static final MemoryModuleType<Integer> POLLINATING_TICKS = register("pollinating_ticks", Codec.INT);
