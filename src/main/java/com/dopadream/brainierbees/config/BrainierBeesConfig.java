@@ -14,8 +14,8 @@ public class BrainierBeesConfig {
                 
                 #Determines the maximum radius in blocks that bees will wander from their hive.
                 #The amount of ticks bees are allowed to spend pathing home scales with this number.
-                # (Default/Vanilla: 24)
-                maxWanderRadius=24
+                # (Default: 25/Vanilla: 22)
+                maxWanderRadius=25
                 
                 #Determines the radius in blocks that bees can target flowers from.
                 # (Default: 8/Vanilla: 5)
