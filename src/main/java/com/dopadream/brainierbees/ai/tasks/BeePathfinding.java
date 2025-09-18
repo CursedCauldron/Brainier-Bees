@@ -116,7 +116,7 @@ public class BeePathfinding extends Behavior<Bee> {
                             mutable.set(
                                     lerp(mutable.getCenter(), Objects.requireNonNull(beeEntity.getLeashData().leashHolder).position(), 0.25)
                             );
-                            break;
+                            break; // Wander freely in a small area when on a leash!
                         }
                     }
                 }
