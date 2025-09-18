@@ -23,7 +23,7 @@ public class BrainierBeesConfig {
                 """;
     }
 
-    public static final int MAX_WANDER_RADIUS = CONFIG.getOrDefault("maxWanderRadius", 24);
+    public static final int MAX_WANDER_RADIUS = CONFIG.getOrDefault("maxWanderRadius", 25);
     public static final int FLOWER_LOCATE_RANGE = CONFIG.getOrDefault("flowerLocateRange", 8);
 
     public static void init(){
