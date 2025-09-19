@@ -121,7 +121,6 @@ public class BeePathfinding extends Behavior<Bee> {
                     }
                 }
             }
-            BrainierBees.LOGGER.info(mutable.getX() + " " + mutable.getZ());
             Path newPath = beeEntity.getNavigation().createPath(mutable, 1);
             beeEntity.getNavigation().moveTo(newPath, 1);
 
