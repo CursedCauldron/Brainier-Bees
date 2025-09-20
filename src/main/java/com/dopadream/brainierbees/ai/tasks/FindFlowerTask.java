@@ -29,24 +29,34 @@ public class FindFlowerTask extends Behavior<Bee> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, Bee entity) {
-        return !entity.hasNectar() || (entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty() && entity.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty()) &&  !(entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get());
+        return !entity.hasNectar() || (entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty() && entity.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty()) && !(entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get());
     }
 
     @Override
     protected boolean canStillUse(ServerLevel world, Bee entity, long l) {
-        return !entity.hasNectar() || (entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty() && entity.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty()) &&  !(entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get());
+        return !entity.hasNectar() || (entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty() && entity.getBrain().getMemory(ModMemoryTypes.POLLINATING_COOLDOWN).isEmpty()) && !(entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && entity.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get());
     }
 
     public BlockPos getFlowerPos(Bee entity, ServerLevel level) {
         int radius = BrainierBeesConfig.FLOWER_LOCATE_RANGE;
+        if (entity.isLeashed()) {
+            radius = 5;
+        }
         List<BlockPos> possibles = Lists.newArrayList();
         for (int x = -radius; x <= radius; x++) {
             for (int z = -radius; z <= radius; z++) {
                 for (int y = -radius; y <= radius; y++) {
+
                     BlockPos pos = new BlockPos(entity.getBlockX() + x, entity.getBlockY() + y, entity.getBlockZ() + z);
+
+                    if (entity.isLeashed() && entity.getLeashData() != null && entity.getLeashData().leashHolder != null) {
+                        pos = new BlockPos(entity.getLeashData().leashHolder.blockPosition().getX() + x, entity.getLeashData().leashHolder.blockPosition().getY() + y, entity.getLeashData().leashHolder.blockPosition().getZ() + z);
+                    }
+
                     if (level.getBlockState(pos).is(BlockTags.FLOWERS) && !level.getBlockState(pos).hasProperty(BlockStateProperties.WATERLOGGED)) {
                         possibles.add(pos);
                     }
+
                 }
             }
         }
@@ -73,15 +83,29 @@ public class FindFlowerTask extends Behavior<Bee> {
             BehaviorUtils.setWalkAndLookTargetMemories(entity, flowerPos, 0.4F, 1);
             Path flower = entity.getNavigation().createPath(flowerPos, 1);
             if (flower != null && flower.canReach()) {
+
                 entity.getNavigation().moveTo(flower, 0.6);
+
                 if (entity.blockPosition().closerThan(flowerPos, 2) && level.getBlockState(flowerPos).is(BlockTags.FLOWERS)) {
                     entity.getBrain().setMemory(ModMemoryTypes.FLOWER_POS, GlobalPos.of(level.dimension(), flowerPos));
                     this.flowerPosPublic = flowerPos;
                 }
+
+                if (entity.isLeashed() && entity.getLeashData() != null && entity.getLeashData().leashHolder != null) {
+                    BlockPos leashOrigin = entity.getLeashData().leashHolder.blockPosition();
+                    if (!leashOrigin.closerThan(flowerPos, 5.5) || !level.getBlockState(flowerPos).is(BlockTags.FLOWERS)) {
+                        entity.getBrain().eraseMemory(ModMemoryTypes.FLOWER_POS);
+                        this.flowerPosPublic = null;
+                        entity.getBrain().setMemory(ModMemoryTypes.POLLINATING_COOLDOWN, UniformInt.of(120, 240).sample(level.getRandom()));
+                    }
+                }
+
             } else {
                 entity.getBrain().eraseMemory(ModMemoryTypes.FLOWER_POS);
+                this.flowerPosPublic = null;
                 entity.getBrain().setMemory(ModMemoryTypes.POLLINATING_COOLDOWN, UniformInt.of(120, 240).sample(level.getRandom()));
             }
+
         }
     }
 
