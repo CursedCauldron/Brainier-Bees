@@ -88,7 +88,7 @@ public class BeePathfinding extends Behavior<Bee> {
                 } else {
                     mutable.set(beeEntity.blockPosition()).move(
                             beeEntity.getRandom().nextInt(5) - 2,
-                            beeEntity.getRandom().nextInt(5) - 2,
+                            beeEntity.getRandom().nextInt(6) - 2,
                             beeEntity.getRandom().nextInt(5) - 2
                     );
                 }
