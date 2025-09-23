@@ -5,6 +5,7 @@ import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -16,6 +17,8 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.function.Predicate;
 
@@ -121,5 +124,15 @@ public class BeeAi {
 
     public static Predicate<ItemStack> getTemptations() {
         return itemStack -> itemStack.is(ItemTags.BEE_FOOD);
+    }
+
+
+    public static boolean isHiveNearFire(ServerLevel level, Bee bee) {
+        if (bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isEmpty()) {
+            return false;
+        } else {
+            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
+            return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity)blockEntity).isFireNearby();
+        }
     }
 }

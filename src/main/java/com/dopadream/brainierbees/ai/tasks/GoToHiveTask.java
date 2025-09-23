@@ -1,21 +1,21 @@
 package com.dopadream.brainierbees.ai.tasks;
 
-import com.dopadream.brainierbees.BrainierBees;
+import com.dopadream.brainierbees.ai.BeeAi;
 import com.dopadream.brainierbees.config.BrainierBeesConfig;
 import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.dopadream.brainierbees.util.HiveAccessor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.Bee;
-import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.world.level.pathfinder.Path;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class GoToHiveTask extends Behavior<Bee> {
 
@@ -24,23 +24,22 @@ public class GoToHiveTask extends Behavior<Bee> {
     }
 
 
-    private boolean isHiveNearFire(ServerLevel level, Bee bee) {
-        if (bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isEmpty()) {
-            return false;
-        } else {
-            BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
-            return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity) blockEntity).isFireNearby();
-        }
-    }
-
     @Override
     protected boolean canStillUse(ServerLevel level, Bee bee, long l) {
-        return bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent() && (bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get()) && !isHiveNearFire(level, bee);
+        return bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()
+                && (bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent()
+                && bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get())
+                && !BeeAi.isHiveNearFire(level, bee)
+                && checkLeadDist(bee);
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, Bee bee) {
-        return bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent() && (bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get()) && !isHiveNearFire(level, bee);
+        return bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()
+                && (bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).isPresent()
+                && bee.getBrain().getMemory(ModMemoryTypes.WANTS_HIVE).get())
+                && !BeeAi.isHiveNearFire(level, bee)
+                && checkLeadDist(bee);
     }
 
     @Override
@@ -58,32 +57,71 @@ public class GoToHiveTask extends Behavior<Bee> {
 
     @Override
     protected void tick(ServerLevel level, Bee bee, long l) {
-        if (bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).isPresent()) {
-            bee.getBrain().setMemory(ModMemoryTypes.TRAVELLING_TICKS, bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).get() + 1);
-            if (bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.TRAVELLING_TICKS).get() > (78 * (BrainierBeesConfig.MAX_WANDER_RADIUS))) {
-                ((HiveAccessor) bee).dropAndBlacklistHive(bee);
-            } else if (!bee.getNavigation().isInProgress()) {
-                this.pathfindDirectlyTowards(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos(), bee);
-            }
-        } else {
-            bee.getBrain().setMemory(ModMemoryTypes.TRAVELLING_TICKS, 1);
-            boolean bl = this.pathfindDirectlyTowards(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos(), bee);
-            if (!bl) {
-                ((HiveAccessor) bee).dropAndBlacklistHive(bee);
-            } else if (bee.getBrain().getMemory(ModMemoryTypes.LAST_PATH).isPresent() && bee.getNavigation().getPath().sameAs(bee.getBrain().getMemory(ModMemoryTypes.LAST_PATH).get())) {
-                if (!bee.getBrain().hasMemoryValue(ModMemoryTypes.STUCK_TICKS)) {
-                    bee.getBrain().setMemory(ModMemoryTypes.STUCK_TICKS, 1);
-                } else {
-                    bee.getBrain().setMemory(ModMemoryTypes.STUCK_TICKS, bee.getBrain().getMemory(ModMemoryTypes.STUCK_TICKS).get() + 1);
-                }
-                if (bee.getBrain().getMemory(ModMemoryTypes.STUCK_TICKS).isPresent() && bee.getBrain().getMemory(ModMemoryTypes.STUCK_TICKS).get() > 600) {
-                    ((HiveAccessor) bee).dropAndBlacklistHive(bee);
-                }
-            } else {
-                bee.getBrain().setMemory(ModMemoryTypes.LAST_PATH, bee.getNavigation().getPath());
+        var brain = bee.getBrain();
+
+        Optional<GlobalPos> hivePosOpt = brain.getMemory(ModMemoryTypes.HIVE_POS);
+        Optional<Integer> travellingTicksOpt = brain.getMemory(ModMemoryTypes.TRAVELLING_TICKS);
+        Optional<Integer> stuckTicksOpt = brain.getMemory(ModMemoryTypes.STUCK_TICKS);
+        Optional<Path> lastPathOpt = brain.getMemory(ModMemoryTypes.LAST_PATH);
+
+        // Handle the homeless
+        if (hivePosOpt.isEmpty()) {
+            brain.setMemory(ModMemoryTypes.TRAVELLING_TICKS, 1);
+            dropHive(bee);
+            return;
+        }
+
+        GlobalPos hiveGlobal = hivePosOpt.get();
+        BlockPos hivePos = hiveGlobal.pos();
+
+        // Travelling ticks handling
+        int travellingTicks = travellingTicksOpt.orElse(0) + 1;
+        brain.setMemory(ModMemoryTypes.TRAVELLING_TICKS, travellingTicks);
+
+        int maxTravelTicks = 80 * BrainierBeesConfig.MAX_WANDER_RADIUS;
+        if (travellingTicks > maxTravelTicks) {
+            dropHive(bee);
+            return;
+        }
+
+        // Pathfinding
+        if (!bee.getNavigation().isInProgress()) {
+            if (!pathfindDirectlyTowards(hivePos, bee)) {
+                dropHive(bee);
+                return;
             }
         }
+
+        // Stuck ticks
+        if (lastPathOpt.isPresent() && Objects.requireNonNull(bee.getNavigation().getPath()).sameAs(lastPathOpt.get())) {
+
+            int stuckTicks = stuckTicksOpt.orElse(0) + 1;
+            brain.setMemory(ModMemoryTypes.STUCK_TICKS, stuckTicks);
+
+            if (stuckTicks > 600) {
+                dropHive(bee);
+            }
+
+        } else {
+            brain.setMemory(ModMemoryTypes.LAST_PATH, bee.getNavigation().getPath());
+        }
     }
+
+    private void dropHive(Bee bee) {
+        ((HiveAccessor) bee).dropAndBlacklistHive(bee);
+    }
+
+    private boolean checkLeadDist(Bee bee) {
+        var canReach = true;
+        if (bee.isLeashed() && bee.getLeashData() != null && bee.getLeashData().leashHolder != null) {
+            BlockPos leashOrigin = bee.getLeashData().leashHolder.blockPosition();
+            if (!leashOrigin.closerThan(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos(), 5.5)) {
+                canReach = false;
+            }
+        }
+        return canReach;
+    }
+
 
     private boolean pathfindDirectlyTowards(BlockPos blockPos, Bee bee) {
         bee.getNavigation().setMaxVisitedNodesMultiplier(10.0F);

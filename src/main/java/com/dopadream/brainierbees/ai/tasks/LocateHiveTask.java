@@ -33,12 +33,6 @@ public class LocateHiveTask extends Behavior<Bee> {
     }
 
     @Override
-    protected boolean canStillUse(ServerLevel serverLevel, Bee livingEntity, long l) {
-        return false;
-    }
-
-
-    @Override
     protected void start(ServerLevel level, Bee bee, long l) {
         bee.getBrain().setMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE, 200);
         this.level = level;

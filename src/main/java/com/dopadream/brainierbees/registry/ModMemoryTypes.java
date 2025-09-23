@@ -19,7 +19,7 @@ public class ModMemoryTypes {
     public static final MemoryModuleType<GlobalPos> HIVE_POS = register("hive_pos", GlobalPos.CODEC);
     public static final MemoryModuleType<Path> LAST_PATH = register("last_path");
 
-    public static final MemoryModuleType<LinkedList<GlobalPos>> HIVE_BLACKLIST = register("hive_blacklist");
+    public static final MemoryModuleType<List<GlobalPos>> HIVE_BLACKLIST = register("hive_blacklist");
 
     public static final MemoryModuleType<Integer> POLLINATING_COOLDOWN = register("pollinating_cooldown", Codec.INT);
     public static final MemoryModuleType<Integer> POLLINATING_TICKS = register("pollinating_ticks", Codec.INT);

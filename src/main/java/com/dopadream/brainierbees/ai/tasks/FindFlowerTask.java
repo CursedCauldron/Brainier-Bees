@@ -4,6 +4,7 @@ import com.dopadream.brainierbees.BrainierBees;
 import com.dopadream.brainierbees.config.BrainierBeesConfig;
 import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.google.common.collect.Lists;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -71,6 +72,11 @@ public class FindFlowerTask extends Behavior<Bee> {
     @Override
     protected void start(ServerLevel level, Bee entity, long l) {
         BlockPos flowerPos = this.getFlowerPos(entity, level);
+
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            BrainierBees.LOGGER.info((entity.getUUID() + " Flower Selected: " + flowerPos));
+        }
+
         if (flowerPos != null && entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty()) {
             this.flowerPosPublic = flowerPos;
         }
@@ -88,7 +94,6 @@ public class FindFlowerTask extends Behavior<Bee> {
 
                 if (entity.blockPosition().closerThan(flowerPos, 2) && level.getBlockState(flowerPos).is(BlockTags.FLOWERS)) {
                     entity.getBrain().setMemory(ModMemoryTypes.FLOWER_POS, GlobalPos.of(level.dimension(), flowerPos));
-                    this.flowerPosPublic = flowerPos;
                 }
 
                 if (entity.isLeashed() && entity.getLeashData() != null && entity.getLeashData().leashHolder != null) {

@@ -103,7 +103,6 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
                 getBrain().setMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE, getBrain().getMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE).get() - 1);
             } else {
                 getBrain().eraseMemory(ModMemoryTypes.COOLDOWN_LOCATE_HIVE);
-                getBrain().eraseMemory(ModMemoryTypes.HIVE_BLACKLIST);
             }
         }
 

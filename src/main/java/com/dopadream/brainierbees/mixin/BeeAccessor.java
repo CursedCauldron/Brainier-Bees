@@ -26,6 +26,9 @@ public interface BeeAccessor {
     @Invoker("incrementNumCropsGrownSincePollination")
     public void invokeIncrementNumCropsGrownSincePollination();
 
+    @Invoker("resetNumCropsGrownSincePollination")
+    public void invokeResetNumCropsGrownSincePollination();
+
     @Invoker("setHasNectar")
     public void invokeSetHasNectar(boolean bool);
 }
