@@ -1,10 +1,7 @@
 package com.dopadream.brainierbees.ai.tasks;
 
-import com.dopadream.brainierbees.ai.BeeAi;
 import com.dopadream.brainierbees.registry.ModMemoryTypes;
-import com.dopadream.brainierbees.mixin.BeeAccessor;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.bee.Bee;
