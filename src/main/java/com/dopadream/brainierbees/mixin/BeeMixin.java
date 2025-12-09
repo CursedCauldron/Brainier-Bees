@@ -2,6 +2,7 @@ package com.dopadream.brainierbees.mixin;
 
 
 import com.dopadream.brainierbees.ai.BeeAi;
+import com.dopadream.brainierbees.config.BrainierBeesConfig;
 import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.dopadream.brainierbees.registry.ModSensorTypes;
 import com.dopadream.brainierbees.util.HiveAccessor;
@@ -39,8 +40,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.UUID;
 
 @Mixin(Bee.class)
 public abstract class BeeMixin extends Animal implements HiveAccessor {
@@ -178,12 +177,9 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
     @Unique
     private boolean brainier_bees$isSickOfSearching() {
         Bee bee = (Bee) (Object) this;
+        int searchAttempts = BrainierBeesConfig.SEARCH_ATTEMPTS;
 
-        if (bee.getBrain().getMemory(ModMemoryTypes.SEARCH_TICKS).isPresent() && (bee.getBrain().getMemory(ModMemoryTypes.SEARCH_TICKS).get() > 10)) {
-            return true;
-        } else {
-            return false;
-        }
+        return bee.getBrain().getMemory(ModMemoryTypes.SEARCH_ATTEMPTS).isPresent() && (bee.getBrain().getMemory(ModMemoryTypes.SEARCH_ATTEMPTS).get() >= searchAttempts);
     }
 
 
@@ -270,7 +266,7 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
                 ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS,
                 ModMemoryTypes.COOLDOWN_LOCATE_HIVE,
                 ModMemoryTypes.TRAVELLING_TICKS,
-                ModMemoryTypes.SEARCH_TICKS,
+                ModMemoryTypes.SEARCH_ATTEMPTS,
                 ModMemoryTypes.STUCK_TICKS,
                 ModMemoryTypes.WANTS_HIVE,
                 MemoryModuleType.IS_PANICKING);

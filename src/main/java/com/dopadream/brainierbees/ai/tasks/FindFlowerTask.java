@@ -64,10 +64,10 @@ public class FindFlowerTask extends Behavior<Bee> {
         }
         if (possibles.isEmpty()) {
             entity.getBrain().setMemory(ModMemoryTypes.POLLINATING_COOLDOWN, UniformInt.of(120, 240).sample(level.getRandom()));
-            BeeAi.incrementMemory(entity.getBrain(), ModMemoryTypes.SEARCH_TICKS);
+            BeeAi.incrementMemory(entity.getBrain(), ModMemoryTypes.SEARCH_ATTEMPTS);
             return null;
         } else {
-            entity.getBrain().eraseMemory(ModMemoryTypes.SEARCH_TICKS);
+            entity.getBrain().eraseMemory(ModMemoryTypes.SEARCH_ATTEMPTS);
             return possibles.get(entity.getRandom().nextInt(possibles.size()));
         }
     }
@@ -80,8 +80,8 @@ public class FindFlowerTask extends Behavior<Bee> {
             if (flowerPos != null) {
                 BrainierBees.LOGGER.info((entity.getUUID() + " Flower Selected: " + flowerPos));
             }
-            if (entity.getBrain().getMemory(ModMemoryTypes.SEARCH_TICKS).isPresent())
-                BrainierBees.LOGGER.info((entity.getUUID() + " Search Ticks: " + entity.getBrain().getMemory(ModMemoryTypes.SEARCH_TICKS).get()));
+            if (entity.getBrain().getMemory(ModMemoryTypes.SEARCH_ATTEMPTS).isPresent())
+                BrainierBees.LOGGER.info((entity.getUUID() + " Search Attempts: " + entity.getBrain().getMemory(ModMemoryTypes.SEARCH_ATTEMPTS).get()));
         }
 
         if (flowerPos != null && entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty()) {

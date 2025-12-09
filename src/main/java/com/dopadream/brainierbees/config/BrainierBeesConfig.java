@@ -14,17 +14,24 @@ public class BrainierBeesConfig {
                 
                 #Determines the maximum radius in blocks that bees will wander from their hive.
                 #The amount of ticks bees are allowed to spend pathing home scales with this number.
-                # (Default: 25/Vanilla: 22)
+                # (Default: 25 | Vanilla: 22)
                 maxWanderRadius=25
                 
                 #Determines the radius in blocks that bees can target flowers from.
-                # (Default: 8/Vanilla: 5)
+                # (Default: 8 | Vanilla: 5)
                 flowerLocateRange=8
+                
+                #Determines the amount of times bees will attempt to search for a flower in-between wander cycles before returning home.
+                #Since the vanilla solution for this is based on a tick counter instead, there is no vanilla value to compare this to.
+                # (Default: 10 | Vanilla: N/A)
+                searchAttempts=10
                 """;
     }
 
     public static final int MAX_WANDER_RADIUS = CONFIG.getOrDefault("maxWanderRadius", 25);
     public static final int FLOWER_LOCATE_RANGE = CONFIG.getOrDefault("flowerLocateRange", 8);
+    public static final int SEARCH_ATTEMPTS = CONFIG.getOrDefault("searchAttempts", 10);
+
 
     public static void init(){
         BrainierBees.LOGGER.info("Config initialized for Brainier Bees");
