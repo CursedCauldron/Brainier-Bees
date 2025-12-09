@@ -14,13 +14,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.entity.animal.bee.Bee;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -43,6 +44,8 @@ import java.util.UUID;
 
 @Mixin(Bee.class)
 public abstract class BeeMixin extends Animal implements HiveAccessor {
+
+    @Shadow private @org.jspecify.annotations.Nullable EntityReference<LivingEntity> persistentAngerTarget;
 
     @Unique
     private static final ImmutableList<SensorType<? extends Sensor<? super Bee>>> SENSOR_TYPES;
@@ -69,7 +72,6 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
         super(entityType, level);
     }
 
-    @Shadow private @Nullable UUID persistentAngerTarget;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void Bee(EntityType<? extends Bee> entityType, Level level, CallbackInfo ci) {
@@ -141,12 +143,25 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
     @Unique
     public boolean brainier_bees$newWantsHive() {
         Bee bee = (Bee) (Object) this;
-        if (((BeeAccessor)bee).getStayOutOfHiveCountdown() <= 0 && !bee.hasStung() && bee.getTarget() == null) {
-            boolean bl = level().isRaining() || level().isMoonVisible() || bee.hasNectar();
+        if (((BeeAccessor)bee).getStayOutOfHiveCountdown() <= 0 && !bee.hasStung() && !this.brainier_bees$newIsPollinating() && bee.getTarget() == null) {
+            boolean bl = this.level().environmentAttributes().getValue(EnvironmentAttributes.BEES_STAY_IN_HIVE, this.position()) || brainier_bees$isSickOfSearching() || bee.hasNectar();
             return bl && !this.brainier_bees$newHiveNearFire();
         } else {
             return false;
         }
+    }
+
+    @Unique
+    public boolean brainier_bees$newIsPollinating() {
+        Bee bee = (Bee) (Object) this;
+
+        boolean pollinating = bee.getBrain().hasMemoryValue(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS);
+
+        if (pollinating && bee.getBrain().getMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS).get() == 0) {
+            pollinating = false;
+        }
+
+        return pollinating;
     }
 
     @Unique
@@ -157,6 +172,17 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
         } else {
             BlockEntity blockEntity = level().getBlockEntity(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
             return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity)blockEntity).isFireNearby();
+        }
+    }
+
+    @Unique
+    private boolean brainier_bees$isSickOfSearching() {
+        Bee bee = (Bee) (Object) this;
+
+        if (bee.getBrain().getMemory(ModMemoryTypes.SEARCH_TICKS).isPresent() && (bee.getBrain().getMemory(ModMemoryTypes.SEARCH_TICKS).get() > 10)) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -176,7 +202,7 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
         }
     }
 
-    @Inject(method = "getBreedOffspring(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/AgeableMob;)Lnet/minecraft/world/entity/animal/Bee;", at = @At("HEAD"))
+    @Inject(method = "getBreedOffspring(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/AgeableMob;)Lnet/minecraft/world/entity/animal/bee/Bee;", at = @At("HEAD"))
     public void getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob, CallbackInfoReturnable<Bee> cir) {
         if (ageableMob != null) {
             BeeAi.initMemories((Bee) ageableMob, ageableMob.getRandom());
@@ -244,6 +270,7 @@ public abstract class BeeMixin extends Animal implements HiveAccessor {
                 ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS,
                 ModMemoryTypes.COOLDOWN_LOCATE_HIVE,
                 ModMemoryTypes.TRAVELLING_TICKS,
+                ModMemoryTypes.SEARCH_TICKS,
                 ModMemoryTypes.STUCK_TICKS,
                 ModMemoryTypes.WANTS_HIVE,
                 MemoryModuleType.IS_PANICKING);

@@ -8,10 +8,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.animal.Bee;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.entity.animal.bee.Bee;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 import java.util.Map;
 

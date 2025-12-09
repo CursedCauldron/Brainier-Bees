@@ -1,5 +1,6 @@
 package com.dopadream.brainierbees.ai.tasks;
 
+import com.dopadream.brainierbees.ai.BeeAi;
 import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.dopadream.brainierbees.mixin.BeeAccessor;
 import net.minecraft.server.level.ServerLevel;
@@ -10,7 +11,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.entity.animal.bee.Bee;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,7 +83,7 @@ public class PollinateFlowerTask extends Behavior<Bee> {
         var brain = bee.getBrain();
 
         // Increment pollination ticks
-        incrementMemory(brain, ModMemoryTypes.POLLINATING_TICKS);
+        BeeAi.incrementMemory(brain, ModMemoryTypes.POLLINATING_TICKS);
 
         int pollinatingTicks = brain.getMemory(ModMemoryTypes.POLLINATING_TICKS).orElse(0);
 
@@ -123,7 +124,7 @@ public class PollinateFlowerTask extends Behavior<Bee> {
                 if (updatePos) this.setWantedPos(bee);
 
                 // Increment *successful* pollination ticks
-                incrementMemory(brain, ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS);
+                BeeAi.incrementMemory(brain, ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS);
                 int successTicks = brain.getMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS).orElse(0);
 
                 if (bee.getRandom().nextFloat() < 0.05F && successTicks > this.lastSoundPlayedTick + 59) {
@@ -139,11 +140,6 @@ public class PollinateFlowerTask extends Behavior<Bee> {
                 clearFlowerMemory(brain);
             }
         });
-    }
-
-    private static void incrementMemory(Brain<?> brain, MemoryModuleType<Integer> type) {
-        int newValue = brain.getMemory(type).orElse(0) + 1;
-        brain.setMemory(type, newValue);
     }
 
     private static void clearFlowerMemory(Brain<?> brain) {

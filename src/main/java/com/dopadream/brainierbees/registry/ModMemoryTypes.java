@@ -26,6 +26,7 @@ public class ModMemoryTypes {
     public static final MemoryModuleType<Integer> SUCCESSFUL_POLLINATING_TICKS = register("successful_pollinating_ticks", Codec.INT);
     public static final MemoryModuleType<Integer> COOLDOWN_LOCATE_HIVE = register("cooldown_locate_hive", Codec.INT);
     public static final MemoryModuleType<Integer> TRAVELLING_TICKS = register("travelling_ticks", Codec.INT);
+    public static final MemoryModuleType<Integer> SEARCH_TICKS = register("search_ticks", Codec.INT);
     public static final MemoryModuleType<Integer> STUCK_TICKS = register("stuck_ticks", Codec.INT);
 
     public static final MemoryModuleType<Boolean> WANTS_HIVE = register("wants_hive", Codec.BOOL);

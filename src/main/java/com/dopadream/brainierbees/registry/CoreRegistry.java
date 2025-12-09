@@ -1,7 +1,7 @@
 package com.dopadream.brainierbees.registry;
 
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class CoreRegistry<T> {
     protected final Registry<T> registry;
@@ -19,7 +19,7 @@ public class CoreRegistry<T> {
     }
 
     public <E extends T> E register(String key, E entry) {
-        return Registry.register(this.registry, ResourceLocation.fromNamespaceAndPath(this.modId, key), entry);
+        return Registry.register(this.registry, Identifier.fromNamespaceAndPath(this.modId, key), entry);
     }
 
     public void register() {

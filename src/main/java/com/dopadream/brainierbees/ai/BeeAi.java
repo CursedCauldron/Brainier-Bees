@@ -14,7 +14,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.entity.animal.bee.Bee;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
@@ -69,7 +69,10 @@ public class BeeAi {
                         Pair.of(0, new FindFlowerTask()),
                         Pair.of(1, new PollinateFlowerTask()),
                         Pair.of(2, EraseMemoryIf.create(Bee::hasNectar, ModMemoryTypes.FLOWER_POS)),
-                        Pair.of(3, EraseMemoryIf.create(Bee::wantsToEnterHive, ModMemoryTypes.FLOWER_POS))
+                        Pair.of(3, EraseMemoryIf.create(
+                                (bee) -> bee.getBrain().hasMemoryValue(ModMemoryTypes.WANTS_HIVE),
+                                ModMemoryTypes.FLOWER_POS
+                        ))
                 ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.TEMPTING_PLAYER, MemoryStatus.VALUE_ABSENT),
@@ -134,5 +137,22 @@ public class BeeAi {
             BlockEntity blockEntity = level.getBlockEntity(bee.getBrain().getMemory(ModMemoryTypes.HIVE_POS).get().pos());
             return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity)blockEntity).isFireNearby();
         }
+    }
+
+
+    public static boolean isPollinating(Bee bee) {
+        boolean pollinating = bee.getBrain().hasMemoryValue(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS);
+
+        if (pollinating && bee.getBrain().getMemory(ModMemoryTypes.SUCCESSFUL_POLLINATING_TICKS).get() == 0) {
+            pollinating = false;
+        }
+
+        return pollinating;
+    }
+
+
+    public static void incrementMemory(Brain<?> brain, MemoryModuleType<Integer> type) {
+        int newValue = brain.getMemory(type).orElse(0) + 1;
+        brain.setMemory(type, newValue);
     }
 }

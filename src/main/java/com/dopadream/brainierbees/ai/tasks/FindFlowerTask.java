@@ -1,6 +1,7 @@
 package com.dopadream.brainierbees.ai.tasks;
 
 import com.dopadream.brainierbees.BrainierBees;
+import com.dopadream.brainierbees.ai.BeeAi;
 import com.dopadream.brainierbees.config.BrainierBeesConfig;
 import com.dopadream.brainierbees.registry.ModMemoryTypes;
 import com.google.common.collect.Lists;
@@ -13,7 +14,7 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.entity.animal.bee.Bee;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.pathfinder.Path;
 
@@ -63,8 +64,10 @@ public class FindFlowerTask extends Behavior<Bee> {
         }
         if (possibles.isEmpty()) {
             entity.getBrain().setMemory(ModMemoryTypes.POLLINATING_COOLDOWN, UniformInt.of(120, 240).sample(level.getRandom()));
+            BeeAi.incrementMemory(entity.getBrain(), ModMemoryTypes.SEARCH_TICKS);
             return null;
         } else {
+            entity.getBrain().eraseMemory(ModMemoryTypes.SEARCH_TICKS);
             return possibles.get(entity.getRandom().nextInt(possibles.size()));
         }
     }
@@ -74,7 +77,11 @@ public class FindFlowerTask extends Behavior<Bee> {
         BlockPos flowerPos = this.getFlowerPos(entity, level);
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            BrainierBees.LOGGER.info((entity.getUUID() + " Flower Selected: " + flowerPos));
+            if (flowerPos != null) {
+                BrainierBees.LOGGER.info((entity.getUUID() + " Flower Selected: " + flowerPos));
+            }
+            if (entity.getBrain().getMemory(ModMemoryTypes.SEARCH_TICKS).isPresent())
+                BrainierBees.LOGGER.info((entity.getUUID() + " Search Ticks: " + entity.getBrain().getMemory(ModMemoryTypes.SEARCH_TICKS).get()));
         }
 
         if (flowerPos != null && entity.getBrain().getMemory(ModMemoryTypes.FLOWER_POS).isEmpty()) {
